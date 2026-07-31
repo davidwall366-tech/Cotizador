@@ -1,0 +1,121 @@
+// Prisma schema — Cotizador de Embarque, Naviera GV
+// Local dev uses SQLite (see .env). Swap `provider` to "postgresql" and point
+// DATABASE_URL at a managed Postgres instance before deploying.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EMPLEADO
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  nombre       String
+  email        String?
+  role         Role     @default(EMPLEADO)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  quotes Quote[] @relation("QuoteCreatedBy")
+}
+
+enum Direccion {
+  ida
+  vuelta
+}
+
+enum Estado {
+  pendiente
+  aprobada
+  rechazada
+}
+
+enum TipoItem {
+  vehiculo
+  carga_general
+  cajon266
+  cajon173
+  cajon231
+  contenedor10
+}
+
+// A single formal quote. `lineas`/`total`/`abono` are a computed snapshot
+// taken at save time (see lib/pricing.ts) so historical documents stay
+// stable even if pricing logic changes later.
+model Quote {
+  id     String @id @default(cuid())
+  numero Int    @unique
+
+  direccion      Direccion @default(ida)
+  cliente        String
+  correo         String
+  fecha          DateTime
+  vigenciaDias   Int       @default(7)
+  vendedor       String    @default("")
+  viajeN         String    @default("")
+  zarpe          String    @default("")
+  plazoRecepcion String    @default("")
+  notas          String    @default("")
+
+  estado Estado @default(pendiente)
+
+  // Computed snapshot (JSON: { label, value }[]) + totals, in CLP.
+  lineasJson String @default("[]")
+  total      Int    @default(0)
+  abono      Int    @default(0)
+
+  createdById String?
+  createdBy   User?   @relation("QuoteCreatedBy", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items QuoteItem[]
+
+  @@index([estado])
+  @@index([direccion])
+}
+
+model QuoteItem {
+  id      String @id @default(cuid())
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  order   Int    @default(0)
+
+  tipo TipoItem
+
+  // carga_general
+  cargaM3   Float?
+  cargaDesc String @default("")
+
+  // cajon266 / cajon173 / cajon231 / contenedor10
+  cajonCantidad Int    @default(1)
+  cajonDesc     String @default("")
+
+  vehiculos Vehiculo[]
+
+  @@index([quoteId])
+}
+
+// Only populated when QuoteItem.tipo == vehiculo (one row per vehicle).
+model Vehiculo {
+  id          String    @id @default(cuid())
+  quoteItemId String
+  quoteItem   QuoteItem @relation(fields: [quoteItemId], references: [id], onDelete: Cascade)
+  largo       Float
+  ancho       Float
+  alto        Float
+
+  @@index([quoteItemId])
+}

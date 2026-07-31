@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+:root {
+  /* Naviera GV design tokens (see README.md § Design Tokens) */
+  --color-navy: #0e2a43;
+  --color-navy-hover: #123a5c;
+  --color-orange: #f5a623;
+  --color-blue: #1f6fb8;
+
+  --color-bg: #f4f6f8;
+  --color-card: #ffffff;
+
+  --color-border: #e2e8f0;
+  --color-border-soft: #d7dee6;
+  --color-border-faint: #eef1f4;
+
+  --color-text: #1f2937;
+  --color-text-muted: #64748b;
+  --color-text-faint: #94a3b8;
+
+  --color-pendiente-bg: #fef3c7;
+  --color-pendiente-fg: #92400e;
+  --color-aprobada-bg: #dcfce7;
+  --color-aprobada-fg: #166534;
+  --color-rechazada-bg: #fee2e2;
+  --color-rechazada-fg: #991b1b;
+}
+
+@theme inline {
+  --color-navy: var(--color-navy);
+  --color-navy-hover: var(--color-navy-hover);
+  --color-orange: var(--color-orange);
+  --color-blue: var(--color-blue);
+  --color-bg: var(--color-bg);
+  --color-card: var(--color-card);
+  --color-border: var(--color-border);
+  --color-border-soft: var(--color-border-soft);
+  --color-border-faint: var(--color-border-faint);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-faint: var(--color-text-faint);
+  --font-heading: var(--font-manrope);
+  --font-body: var(--font-source-sans);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-manrope), sans-serif;
+}
+
+input,
+select,
+textarea {
+  font-family: var(--font-source-sans), sans-serif;
+}
+
+a {
+  color: var(--color-blue);
+  text-decoration: none;
+}
+a:hover {
+  color: #154f85;
+  text-decoration: underline;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
