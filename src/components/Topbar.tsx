@@ -14,10 +14,11 @@ function navBtnClass(active: boolean) {
   ].join(" ");
 }
 
-export default function Topbar({ nombre }: { nombre: string }) {
+export default function Topbar({ nombre, isAdmin }: { nombre: string; isAdmin: boolean }) {
   const pathname = usePathname();
   const isList = pathname === "/cotizaciones";
   const isNew = pathname?.startsWith("/cotizaciones/nueva");
+  const isEmpleados = pathname?.startsWith("/empleados");
 
   return (
     <div className="no-print bg-[#0e2a43] text-white px-7 py-3 min-h-16 flex items-center justify-between flex-wrap gap-3">
@@ -41,6 +42,11 @@ export default function Topbar({ nombre }: { nombre: string }) {
         <Link href="/cotizaciones/nueva" className={navBtnClass(!!isNew)}>
           + Nueva cotización
         </Link>
+        {isAdmin && (
+          <Link href="/empleados" className={navBtnClass(!!isEmpleados)}>
+            Empleados
+          </Link>
+        )}
       </div>
       <div className="flex items-center gap-3.5">
         <div className="text-sm text-[#dbe6ef]">{nombre}</div>

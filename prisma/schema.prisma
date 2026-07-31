@@ -1,13 +1,12 @@
 // Prisma schema — Cotizador de Embarque, Naviera GV
-// Local dev uses SQLite (see .env). Swap `provider` to "postgresql" and point
-// DATABASE_URL at a managed Postgres instance before deploying.
+// Postgres (Neon). See .env for DATABASE_URL.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

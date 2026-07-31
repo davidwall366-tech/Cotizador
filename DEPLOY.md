@@ -12,41 +12,40 @@ Requisitos: Node.js 20+ y npm.
 ```bash
 npm install
 cp .env.example .env      # y completa los valores (ver más abajo)
-npx prisma migrate dev    # crea la base SQLite local y aplica migraciones
+npx prisma migrate dev    # aplica las migraciones a tu base Postgres
 npm run db:seed           # crea el usuario admin + 3 cotizaciones de ejemplo
 npm run dev               # http://localhost:3000
 ```
 
 Login inicial: `admin` / `cambiar123` (cámbialo cuanto antes; ver §6).
 
+> El proyecto usa **Postgres desde desarrollo** (ya no SQLite) — una única base
+> gestionada en Neon sirve tanto para desarrollo como, hoy, para producción.
+> Antes de tener tráfico real conviene separar ambos entornos (ver nota en §2.1).
+
 ---
 
-## 2. Base de datos de producción (Postgres)
+## 2. Base de datos (Postgres)
 
-SQLite es solo para desarrollo local. En producción (especialmente en Vercel, que
-es serverless y sin disco persistente) hay que usar Postgres gestionado.
+### 2.1 Estado actual
 
-### 2.1 Crear la base
+Ya existe un proyecto Neon (`cotizador-naviera-gv`, Postgres 17, `us-west-2`)
+creado con `neonctl`, cuya cadena de conexión está en `.env` como `DATABASE_URL`.
+Las migraciones (`prisma/migrations/`) y el seed ya corrieron contra esa base.
 
-Crea una base gratuita en [Neon](https://neon.tech) o [Supabase](https://supabase.com).
-Copia la cadena de conexión, que se verá parecida a:
+> **Antes de invitar empleados reales:** considera crear un segundo proyecto/rama
+> Neon solo para producción (`neonctl projects create` de nuevo, o usa branching
+> de Neon) y dejar este para desarrollo — hoy ambos apuntan a la misma base.
+
+Si en cambio prefieres partir de cero en otro proveedor (Supabase, RDS, etc.),
+crea la base y copia su cadena de conexión, que se verá parecida a:
 
 ```
 postgresql://usuario:password@host:5432/basedatos?sslmode=require
 ```
 
-### 2.2 Cambiar el provider de Prisma
-
-En [`prisma/schema.prisma`](prisma/schema.prisma), cambia:
-
-```prisma
-datasource db {
-  provider = "sqlite"        // ← cambiar a "postgresql"
-  url      = env("DATABASE_URL")
-}
-```
-
-por:
+El `provider` de Prisma ya está en `"postgresql"` en
+[`prisma/schema.prisma`](prisma/schema.prisma):
 
 ```prisma
 datasource db {
@@ -55,12 +54,12 @@ datasource db {
 }
 ```
 
-### 2.3 Generar la migración inicial contra Postgres
+### 2.2 Aplicar migraciones contra una base nueva
 
-Con `DATABASE_URL` apuntando a la base Postgres:
+Si apuntas `DATABASE_URL` a una base Postgres distinta (nueva, vacía):
 
 ```bash
-npx prisma migrate dev --name init_postgres
+npx prisma migrate deploy   # aplica las migraciones existentes tal cual
 npm run db:seed
 ```
 
@@ -165,19 +164,21 @@ los toma solos. Para crearlos desde cero:
 
 ## 6. Gestión de empleados
 
-Hoy los usuarios se crean con el script de seed (`prisma/seed.ts`) o insertando
-en la base. La contraseña se guarda con hash bcrypt. Para agregar empleados hay
-dos caminos por ahora:
+Los usuarios con rol `ADMIN` ven un link "Empleados" en la barra superior que
+lleva a `/empleados`. Ahí puedes:
 
-- Ajustar/re-ejecutar el seed con nuevos usuarios, o
-- Insertar manualmente (con la contraseña hasheada).
+- Crear un empleado nuevo (usuario, nombre, correo opcional, contraseña, rol).
+- Editar un empleado existente (cambiar datos, resetear contraseña, cambiar
+  rol, activarlo/desactivarlo).
+- El admin no puede quitarse su propio rol ni desactivarse a sí mismo (evita
+  quedarse afuera del sistema).
 
-> **Pendiente sugerido:** una pantalla de administración para crear/editar
-> empleados (alta, baja, reset de contraseña, correo del vendedor). Es la pieza
-> que falta para que un admin gestione el equipo sin tocar la base.
+El usuario `admin` inicial se crea con el seed (`npm run db:seed`), a partir de
+`SEED_ADMIN_*` en el entorno. **Cambia esa contraseña por defecto (`cambiar123`)
+lo antes posible** desde la pantalla `/empleados/[id]/editar`.
 
-Recuerda cambiar la contraseña del admin por defecto (`cambiar123`) antes de
-poner esto en manos del equipo.
+Los empleados desactivados no pueden iniciar sesión (verificado en el callback
+de NextAuth, no solo en la UI).
 
 ---
 
