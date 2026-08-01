@@ -308,7 +308,9 @@ export function condicionesForTipos(tiposPresentes: TipoItem[], vigenciaDias: nu
       "Modalidad de traslado (funda de protección): si no se informa una preferencia, se asumirá que viajarán con funda. Naviera GV no se responsabiliza por desgastes derivados del transporte marítimo."
     );
   }
-  lines.push("Debe entregar su carga embalada y lista para el transporte.");
+  lines.push(
+    "Si su carga se recibe sin embalaje, se procederá a embalarla con el costo respectivo para el cliente. En caso de que se entregue ya embalada, la empresa se reserva el derecho de reembalarla si considera que la protección actual es insuficiente para el transporte marítimo, cobrando el costo adicional que esto implique."
+  );
   if (tiposPresentes.includes("contenedor10")) {
     lines.push(
       "Alcance del servicio: operamos exclusivamente el tramo marítimo hasta el puerto de destino; no realizamos retiros a domicilio ni entregas finales. El cliente debe retirar la carga y devolver el contenedor vacío el mismo día de la descarga."
