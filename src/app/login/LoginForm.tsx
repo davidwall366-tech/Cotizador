@@ -8,6 +8,7 @@ export default function LoginForm() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -47,14 +48,24 @@ export default function LoginForm() {
         <label className="block mb-2 text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">
           Contraseña
         </label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          autoComplete="current-password"
-          className="w-full pb-2.5 border-0 border-b-[1.5px] border-[#e5e9ee] text-[15px] outline-none bg-transparent text-[#0e2a43]"
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            autoComplete="current-password"
+            className="w-full pb-2.5 pr-12 border-0 border-b-[1.5px] border-[#e5e9ee] text-[15px] outline-none bg-transparent text-[#0e2a43]"
+          />
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => setShowPassword((v) => !v)}
+            className="absolute right-0 top-0 text-xs font-semibold text-[#1f6fb8] cursor-pointer"
+          >
+            {showPassword ? "Ocultar" : "Ver"}
+          </button>
+        </div>
       </div>
 
       {error && <div className="text-sm text-[#991b1b]">{error}</div>}

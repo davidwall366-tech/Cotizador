@@ -168,7 +168,7 @@ export default function QuoteForm({
             />
           </div>
           <div>
-            <label className={lblStyle}>Vendedor / empleado</label>
+            <label className={lblStyle}>Usuario</label>
             <input
               value={form.vendedor}
               disabled

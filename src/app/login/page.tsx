@@ -51,10 +51,10 @@ export default function LoginPage() {
         <div className="flex-1 basis-[380px] min-w-[300px] flex items-center justify-center py-14 px-11">
           <div className="w-full max-w-[300px]">
             <div className="text-xl font-bold mb-0.5 text-[#0e2a43] tracking-tight">
-              Acceso empleados
+              Acceso usuarios
             </div>
             <div className="text-[13px] text-[#94a3b8] mb-8">
-              Ingresa con tu usuario o correo de Naviera GV
+              Ingresa con tu correo de Naviera GV
             </div>
             <LoginForm />
           </div>
