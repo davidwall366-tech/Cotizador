@@ -44,8 +44,8 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
           Estimado/a <b>{vm.cliente}</b>,
         </p>
         <p className="text-sm leading-[1.7] text-[#334155]">
-          Junto con saludarle, adjunto la cotización formal para {vm.intro} y detallo a continuación
-          las condiciones comerciales y operacionales del servicio:
+          Junto con saludarle, adjunto la cotización formal para {vm.intro}. Los detalles, así como
+          las condiciones comerciales y operacionales, se detallan a continuación:
         </p>
 
         <div className="text-sm font-bold text-[#0e2a43] my-[22px] mb-2.5">

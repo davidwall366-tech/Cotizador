@@ -335,7 +335,7 @@ export const DIRECCION_LABEL: Record<Direccion, string> = {
 export function introForTipos(tiposPresentes: TipoItem[]): string {
   return tiposPresentes.length === 1
     ? TIPOS_META[tiposPresentes[0]].intro
-    : "el servicio de transporte de su carga, según el detalle indicado a continuación";
+    : "el servicio de transporte de su carga";
 }
 
 export function logisticaTitulo(direccion: Direccion): string {
