@@ -11,6 +11,7 @@ const itemSchema = z.object({
   vehiculos: z.array(vehiculoSchema).optional(),
   cargaM3: z.coerce.number().min(0).optional(),
   cargaDesc: z.string().optional().default(""),
+  embalajeCosto: z.coerce.number().min(0).optional(),
   cajonCantidad: z.coerce.number().min(1).optional(),
   cajonDesc: z.string().optional().default(""),
 });

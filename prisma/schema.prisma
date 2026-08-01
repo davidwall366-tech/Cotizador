@@ -95,8 +95,9 @@ model QuoteItem {
   tipo TipoItem
 
   // carga_general
-  cargaM3   Float?
-  cargaDesc String @default("")
+  cargaM3       Float?
+  cargaDesc     String @default("")
+  embalajeCosto Float?
 
   // cajon266 / cajon173 / cajon231 / contenedor10
   cajonCantidad Int    @default(1)

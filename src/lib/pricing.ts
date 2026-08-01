@@ -28,6 +28,7 @@ export interface QuoteItemInput {
   vehiculos?: VehiculoInput[];
   cargaM3?: number;
   cargaDesc: string;
+  embalajeCosto?: number;
   cajonCantidad?: number;
   cajonDesc: string;
 }
@@ -127,6 +128,7 @@ export function blankItem(tipo: TipoItem = "vehiculo"): QuoteItemInput {
     vehiculos: [{ largo: 0, ancho: 0, alto: 0 }],
     cargaM3: undefined,
     cargaDesc: "",
+    embalajeCosto: undefined,
     cajonCantidad: 1,
     cajonDesc: "",
   };
@@ -181,10 +183,17 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion): Linea
     lineas.push({ label: gruaLabel, value: count * 95000 });
   } else if (tipo === "carga_general") {
     const m3 = Number(item.cargaM3) || 0;
+    const desc = (item.cargaDesc || "").trim();
     lineas.push({
-      label: `Transporte Marítimo Carga General (${m3} m³ × ${fmtRate(rate)}/m³)`,
+      label:
+        `Transporte Marítimo Carga General (${m3} m³ × ${fmtRate(rate)}/m³)` +
+        (desc ? ` — ${desc}` : ""),
       value: Math.round(m3 * rate),
     });
+    const embalajeCosto = Number(item.embalajeCosto) || 0;
+    if (embalajeCosto > 0) {
+      lineas.push({ label: "Embalaje (costo aproximado)", value: Math.round(embalajeCosto) });
+    }
   } else if (tipo === "cajon266") {
     const qty = Number(item.cajonCantidad) || 0;
     if (direccion !== "vuelta") {

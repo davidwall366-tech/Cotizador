@@ -24,6 +24,7 @@ export function itemsFromDb(quote: QuoteWithRelations): QuoteItemInput[] {
       vehiculos: it.vehiculos.map((v) => ({ largo: v.largo, ancho: v.ancho, alto: v.alto })),
       cargaM3: it.cargaM3 ?? undefined,
       cargaDesc: it.cargaDesc,
+      embalajeCosto: it.embalajeCosto ?? undefined,
       cajonCantidad: it.cajonCantidad,
       cajonDesc: it.cajonDesc,
     }));

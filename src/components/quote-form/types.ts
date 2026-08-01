@@ -11,6 +11,7 @@ export interface ItemState {
   vehiculos: VehiculoRow[];
   cargaM3: string;
   cargaDesc: string;
+  embalajeCosto: string;
   cajonCantidad: string;
   cajonDesc: string;
 }
@@ -21,6 +22,7 @@ export function blankItemState(tipo: TipoItem = "vehiculo"): ItemState {
     vehiculos: [{ largo: "", ancho: "", alto: "" }],
     cargaM3: "",
     cargaDesc: "",
+    embalajeCosto: "",
     cajonCantidad: "1",
     cajonDesc: "",
   };

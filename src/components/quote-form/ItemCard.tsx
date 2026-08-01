@@ -192,6 +192,18 @@ export default function ItemCard({
               className={inputStyle}
             />
           </div>
+          <div>
+            <label className={lblStyle}>Embalaje (costo aproximado)</label>
+            <input
+              type="number"
+              min={0}
+              step={1000}
+              value={item.embalajeCosto}
+              onChange={(e) => onChange({ embalajeCosto: e.target.value })}
+              placeholder="Ej: 30000"
+              className={inputStyle}
+            />
+          </div>
         </div>
       )}
 

@@ -17,7 +17,7 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
         <div className="text-right text-[#dbe6ef] text-xs leading-relaxed">
           <div className="text-white font-bold text-sm">Naviera GV S.A.</div>
           <div>RUT 76.015.455-5</div>
-          <div>Transporte marítimo · Valparaíso — Rapa Nui</div>
+          <div>Transporte marítimo</div>
           <div>info@navieragv.cl</div>
         </div>
       </div>

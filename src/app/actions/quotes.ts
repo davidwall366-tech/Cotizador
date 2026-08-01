@@ -19,6 +19,7 @@ function toItemInputs(items: QuoteFormInput["items"]): QuoteItemInput[] {
     vehiculos: it.vehiculos,
     cargaM3: it.cargaM3,
     cargaDesc: it.cargaDesc,
+    embalajeCosto: it.embalajeCosto,
     cajonCantidad: it.cajonCantidad,
     cajonDesc: it.cajonDesc,
   }));
@@ -64,6 +65,7 @@ export async function createQuote(raw: QuoteFormInput): Promise<{ id: string }> 
           tipo: it.tipo,
           cargaM3: it.cargaM3,
           cargaDesc: it.cargaDesc,
+          embalajeCosto: it.embalajeCosto,
           cajonCantidad: it.cajonCantidad ?? 1,
           cajonDesc: it.cajonDesc,
           vehiculos: it.vehiculos
@@ -114,6 +116,7 @@ export async function updateQuote(id: string, raw: QuoteFormInput): Promise<{ id
             tipo: it.tipo,
             cargaM3: it.cargaM3,
             cargaDesc: it.cargaDesc,
+            embalajeCosto: it.embalajeCosto,
             cajonCantidad: it.cajonCantidad ?? 1,
             cajonDesc: it.cajonDesc,
             vehiculos: it.vehiculos
@@ -138,4 +141,12 @@ export async function setEstado(id: string, estado: "pendiente" | "aprobada" | "
   await prisma.quote.update({ where: { id }, data: { estado } });
   revalidatePath("/cotizaciones");
   revalidatePath(`/cotizaciones/${id}`);
+}
+
+export async function deleteQuote(id: string) {
+  const session = await auth();
+  if (!session?.user) throw new Error("No autenticado.");
+
+  await prisma.quote.delete({ where: { id } });
+  revalidatePath("/cotizaciones");
 }

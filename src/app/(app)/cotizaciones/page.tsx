@@ -4,6 +4,7 @@ import { fmtCLP, fmtDate, DIRECCION_LABEL, type Direccion } from "@/lib/pricing"
 import { tipoLabelForQuote } from "@/lib/quote-view";
 import FilterBar from "@/components/FilterBar";
 import EstadoSelect from "@/components/EstadoSelect";
+import DeleteQuoteButton from "@/components/DeleteQuoteButton";
 import type { Prisma } from "@prisma/client";
 
 export default async function CotizacionesPage({
@@ -104,10 +105,11 @@ export default async function CotizacionesPage({
                     </Link>
                     <a
                       href={`/api/cotizaciones/${q.id}/pdf`}
-                      className="bg-transparent border border-[#d7dee6] text-[#0e2a43] rounded-[7px] px-2.5 py-[7px] text-[13px] inline-block"
+                      className="bg-transparent border border-[#d7dee6] text-[#0e2a43] rounded-[7px] px-2.5 py-[7px] text-[13px] mr-1.5 inline-block"
                     >
                       Descargar
                     </a>
+                    <DeleteQuoteButton id={q.id} numero={q.numero} />
                   </td>
                 </tr>
               ))}

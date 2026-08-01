@@ -29,6 +29,7 @@ export function dbToFormState(quote: QuoteWithRelations): QuoteFormState {
           : [{ largo: "", ancho: "", alto: "" }],
         cargaM3: it.cargaM3 != null ? String(it.cargaM3) : "",
         cargaDesc: it.cargaDesc,
+        embalajeCosto: it.embalajeCosto != null ? String(it.embalajeCosto) : "",
         cajonCantidad: String(it.cajonCantidad ?? 1),
         cajonDesc: it.cajonDesc,
       })),
@@ -45,6 +46,7 @@ export function itemStateToInput(it: ItemState): QuoteItemInput {
     })),
     cargaM3: it.cargaM3 === "" ? undefined : Number(it.cargaM3),
     cargaDesc: it.cargaDesc,
+    embalajeCosto: it.embalajeCosto === "" ? undefined : Number(it.embalajeCosto),
     cajonCantidad: it.cajonCantidad === "" ? undefined : Number(it.cajonCantidad),
     cajonDesc: it.cajonDesc,
   };
