@@ -17,10 +17,14 @@ enum Role {
 
 model User {
   id           String   @id @default(cuid())
+  // Login credential — auto-generated from the employee's email on creation
+  // (see employees.ts); no longer entered by hand in the admin UI.
   username     String   @unique
   passwordHash String
   nombre       String
-  email        String?
+  // Required going forward for new/edited accounts (see employee-schema.ts) —
+  // still nullable here so pre-existing accounts aren't broken retroactively.
+  email        String?  @unique
   role         Role     @default(EMPLEADO)
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())

@@ -38,7 +38,7 @@ export default async function CotizacionesPage({
       <div className="flex justify-between items-end flex-wrap gap-4 mb-[22px]">
         <div>
           <div className="text-2xl font-extrabold text-[#0e2a43]">Cotizaciones</div>
-          <div className="text-sm text-[#64748b] mt-1">Embarques Valparaíso — Rapa Nui</div>
+          <div className="text-sm text-[#64748b] mt-1">Transporte Marítimo</div>
         </div>
         <Link
           href="/cotizaciones/nueva"

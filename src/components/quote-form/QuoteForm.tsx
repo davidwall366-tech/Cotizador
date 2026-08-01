@@ -171,10 +171,13 @@ export default function QuoteForm({
             <label className={lblStyle}>Vendedor / empleado</label>
             <input
               value={form.vendedor}
-              onChange={(e) => patchForm({ vendedor: e.target.value })}
-              placeholder="Nombre del empleado"
-              className={inputStyle}
+              disabled
+              readOnly
+              className={`${inputStyle} bg-[#f1f5f9] text-[#64748b] cursor-not-allowed`}
             />
+            <div className="text-xs text-[#94a3b8] mt-1">
+              Se completa solo con tu usuario y no se puede editar.
+            </div>
           </div>
           <div>
             <label className={lblStyle}>N° de viaje</label>

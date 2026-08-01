@@ -11,19 +11,36 @@ import {
   type EmployeeUpdateInput,
 } from "@/lib/employee-schema";
 
+// The login credential is still a "username" internally, but the admin no
+// longer types one — it's derived from the employee's email (now the field
+// that actually identifies them) so the account can still log in.
+function usernameSlugFromEmail(email: string): string {
+  const local = email.split("@")[0].toLowerCase();
+  const slug = local.replace(/[^a-z0-9._-]/g, "").slice(0, 30);
+  return slug.length >= 3 ? slug : slug.padEnd(3, "0");
+}
+
+async function generateUniqueUsername(email: string): Promise<string> {
+  const base = usernameSlugFromEmail(email);
+  let candidate = base;
+  let suffix = 1;
+  while (await prisma.user.findUnique({ where: { username: candidate } })) {
+    suffix += 1;
+    candidate = `${base}${suffix}`.slice(0, 30);
+  }
+  return candidate;
+}
+
 export async function createEmployee(raw: EmployeeCreateInput): Promise<{ id: string }> {
   await requireAdminForAction();
   const input = employeeCreateSchema.parse(raw);
 
-  const existing = await prisma.user.findUnique({ where: { username: input.username } });
-  if (existing) {
-    throw new Error(`El usuario "${input.username}" ya existe.`);
-  }
+  const username = await generateUniqueUsername(input.email);
 
   const passwordHash = await bcrypt.hash(input.password, 12);
   const user = await prisma.user.create({
     data: {
-      username: input.username,
+      username,
       nombre: input.nombre,
       email: input.email,
       role: input.role,
@@ -51,13 +68,13 @@ export async function updateEmployee(id: string, raw: EmployeeUpdateInput): Prom
 
   const data: {
     nombre: string;
-    email: string | null;
+    email: string;
     role: "ADMIN" | "EMPLEADO";
     active: boolean;
     passwordHash?: string;
   } = {
     nombre: input.nombre,
-    email: input.email ?? null,
+    email: input.email,
     role: input.role,
     active: input.active,
   };

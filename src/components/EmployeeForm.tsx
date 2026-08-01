@@ -9,7 +9,6 @@ const inputStyle =
   "w-full px-3 py-2.5 border border-[#d7dee6] rounded-lg text-sm outline-none font-[inherit]";
 
 export interface EmployeeFormInitial {
-  username?: string;
   nombre?: string;
   email?: string;
   role?: "ADMIN" | "EMPLEADO";
@@ -28,7 +27,6 @@ export default function EmployeeForm({
   isSelf?: boolean;
 }) {
   const router = useRouter();
-  const [username, setUsername] = useState(initial.username || "");
   const [nombre, setNombre] = useState(initial.nombre || "");
   const [email, setEmail] = useState(initial.email || "");
   const [password, setPassword] = useState("");
@@ -39,8 +37,8 @@ export default function EmployeeForm({
 
   const canSubmit =
     mode === "new"
-      ? username.length >= 3 && nombre.length > 0 && password.length >= 8
-      : nombre.length > 0;
+      ? nombre.length > 0 && email.length > 0 && password.length >= 8
+      : nombre.length > 0 && email.length > 0;
 
   async function onSubmit() {
     setError(null);
@@ -49,7 +47,7 @@ export default function EmployeeForm({
         if (mode === "edit" && employeeId) {
           await updateEmployee(employeeId, { nombre, email, role, active, password });
         } else {
-          await createEmployee({ username, nombre, email, password, role });
+          await createEmployee({ nombre, email, password, role });
         }
         router.push("/empleados");
       } catch (e) {
@@ -66,45 +64,30 @@ export default function EmployeeForm({
 
       <div className="bg-white border border-[#e2e8f0] rounded-xl p-[22px] mb-5 flex flex-col gap-4">
         <div>
-          <label className={lblStyle}>Usuario</label>
-          {mode === "new" ? (
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="ej: dsalinas"
-              autoCapitalize="none"
-              autoCorrect="off"
-              className={inputStyle}
-            />
-          ) : (
-            <div className="py-2.5 text-sm text-[#475569]">
-              {initial.username}{" "}
-              <span className="text-xs text-[#94a3b8]">(no se puede cambiar)</span>
-            </div>
-          )}
-        </div>
-
-        <div>
-          <label className={lblStyle}>Nombre</label>
+          <label className={lblStyle}>Nombre y apellido</label>
           <input
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej: David Salinas"
+            placeholder="Ej: Rodrigo Guarda"
             className={inputStyle}
           />
+          <div className="text-xs text-[#94a3b8] mt-1">
+            Nombre completo, para identificar al empleado en el sistema.
+          </div>
         </div>
 
         <div>
-          <label className={lblStyle}>Correo (opcional)</label>
+          <label className={lblStyle}>Correo</label>
           <input
             type="email"
+            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="empleado@navieragv.cl"
             className={inputStyle}
           />
           <div className="text-xs text-[#94a3b8] mt-1">
-            Se usa para copiar al vendedor cuando envía cotizaciones al cliente.
+            Obligatorio: recibe las notificaciones del sistema (alertas de vencimiento, copias de cotizaciones enviadas).
           </div>
         </div>
 

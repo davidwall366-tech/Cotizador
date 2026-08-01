@@ -20,7 +20,6 @@ export default async function EditarEmpleadoPage({
       employeeId={user.id}
       isSelf={admin.id === user.id}
       initial={{
-        username: user.username,
         nombre: user.nombre,
         email: user.email ?? "",
         role: user.role,
