@@ -33,12 +33,12 @@ export default function LoginForm() {
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
       <div>
         <label className="block mb-2 text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">
-          Usuario
+          Usuario o correo
         </label>
         <input
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="ej: dsalinas"
+          placeholder="ej: dsalinas o empleado@navieragv.cl"
           autoComplete="username"
           className="w-full pb-2.5 border-0 border-b-[1.5px] border-[#e5e9ee] text-[15px] outline-none bg-transparent text-[#0e2a43]"
         />

@@ -14,11 +14,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Contraseña", type: "password" },
       },
       async authorize(credentials) {
-        const username = credentials?.username;
+        const identifier = credentials?.username;
         const password = credentials?.password;
-        if (typeof username !== "string" || typeof password !== "string") return null;
+        if (typeof identifier !== "string" || typeof password !== "string") return null;
 
-        const user = await prisma.user.findUnique({ where: { username } });
+        // Employees only ever see their email (the "Usuario" field was
+        // removed from the creation form — see EmployeeForm.tsx), so login
+        // accepts either the auto-generated username or the email on file.
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [{ username: identifier }, { email: { equals: identifier, mode: "insensitive" } }],
+          },
+        });
         if (!user || !user.active) return null;
 
         const valid = await bcrypt.compare(password, user.passwordHash);

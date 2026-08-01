@@ -54,7 +54,7 @@ export default function LoginPage() {
               Acceso empleados
             </div>
             <div className="text-[13px] text-[#94a3b8] mb-8">
-              Ingresa con tu usuario de Naviera GV
+              Ingresa con tu usuario o correo de Naviera GV
             </div>
             <LoginForm />
           </div>
