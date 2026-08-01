@@ -24,12 +24,12 @@ export default function Topbar({ nombre, isAdmin }: { nombre: string; isAdmin: b
     <div className="no-print bg-[#0e2a43] text-white px-7 py-3 min-h-16 flex items-center justify-between flex-wrap gap-3">
       <div className="flex items-center gap-3">
         <Image
-          src="/assets/logo-naviera-gv.jpg"
+          src="/assets/logo-icon.png"
           alt="Naviera GV"
           width={38}
           height={38}
           unoptimized
-          className="object-contain bg-white rounded-lg p-1"
+          className="object-contain bg-white rounded-lg p-0.5"
         />
         <div className="text-[17px] font-extrabold tracking-wide">
           Naviera GV <span className="font-medium text-[#9fb4c7]">· Cotizador</span>

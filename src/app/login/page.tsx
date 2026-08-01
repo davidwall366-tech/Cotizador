@@ -30,12 +30,12 @@ export default function LoginPage() {
           </svg>
           <div className="relative">
             <Image
-              src="/assets/logo-naviera-gv.jpg"
+              src="/assets/logo-icon.png"
               alt="Naviera GV"
               width={56}
               height={56}
               unoptimized
-              className="object-contain bg-white rounded-xl p-2"
+              className="object-contain bg-white rounded-xl p-1"
             />
           </div>
           <div className="relative text-white">

@@ -171,7 +171,7 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion): Linea
     const m3r = Math.round(totalM3 * 100) / 100;
     const count = rows.length;
     lineas.push({
-      label: `Transporte Marítimo (${m3r} m³ × ${fmtRate(rate)}/m³)`,
+      label: `Transporte Marítimo Vehículo${count === 1 ? "" : "s"} (${m3r} m³ × ${fmtRate(rate)}/m³)`,
       value: Math.round(m3r * rate),
     });
     const gruaLabel =
@@ -233,7 +233,7 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion): Linea
       });
     }
     lineas.push({
-      label: `Transporte Marítimo (${m3Str} m³ × ${fmtRate(rate)}/m³) × ${qty}`,
+      label: `Transporte Marítimo Contenedor 10 pies (${m3Str} m³ × ${fmtRate(rate)}/m³) × ${qty}`,
       value: Math.round(m3 * rate) * qty,
     });
   }
