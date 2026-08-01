@@ -299,6 +299,9 @@ export function condicionesForTipos(tiposPresentes: TipoItem[], vigenciaDias: nu
       "Identificación de vehículos: al entregarlos debe indicarse la ubicación exacta de los números de chasis y motor, coincidentes estrictamente con el padrón; de lo contrario no se recibirán."
     );
     lines.push(
+      "Al momento de la entrega del vehículo, se debe indicar la ubicación de los números de chasis y motor para verificar que coincidan exactamente con el padrón o la factura correspondientes. Lo anterior responde a una exigencia del Servicio Nacional de Aduanas."
+    );
+    lines.push(
       "Carga interna: los vehículos deben entregarse completamente vacíos, sin carga ni efectos personales en su interior."
     );
     lines.push(
