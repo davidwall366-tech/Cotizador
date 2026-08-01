@@ -30,15 +30,21 @@ export default function EmployeeForm({
   const [nombre, setNombre] = useState(initial.nombre || "");
   const [email, setEmail] = useState(initial.email || "");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"ADMIN" | "EMPLEADO">(initial.role || "EMPLEADO");
   const [active, setActive] = useState(initial.active ?? true);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const passwordsMatch = password === confirmPassword;
+
   const canSubmit =
     mode === "new"
-      ? nombre.length > 0 && email.length > 0 && password.length >= 8
-      : nombre.length > 0 && email.length > 0;
+      ? nombre.length > 0 && email.length > 0 && password.length >= 8 && passwordsMatch
+      : nombre.length > 0 &&
+        email.length > 0 &&
+        (password.length === 0 || (password.length >= 8 && passwordsMatch));
 
   async function onSubmit() {
     setError(null);
@@ -95,14 +101,51 @@ export default function EmployeeForm({
           <label className={lblStyle}>
             {mode === "edit" ? "Nueva contraseña (dejar en blanco para no cambiar)" : "Contraseña"}
           </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Mínimo 8 caracteres"
-            autoComplete="new-password"
-            className={inputStyle}
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Mínimo 8 caracteres"
+              autoComplete="new-password"
+              className={`${inputStyle} pr-14`}
+            />
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#1f6fb8] cursor-pointer"
+            >
+              {showPassword ? "Ocultar" : "Ver"}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className={lblStyle}>
+            {mode === "edit" ? "Confirmar nueva contraseña" : "Confirmar contraseña"}
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Repite la contraseña"
+              autoComplete="new-password"
+              className={`${inputStyle} pr-14`}
+            />
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#1f6fb8] cursor-pointer"
+            >
+              {showPassword ? "Ocultar" : "Ver"}
+            </button>
+          </div>
+          {!passwordsMatch && confirmPassword.length > 0 && (
+            <div className="text-xs text-[#dc2626] mt-1">Las contraseñas no coinciden.</div>
+          )}
         </div>
 
         <div>
