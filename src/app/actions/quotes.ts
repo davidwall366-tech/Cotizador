@@ -110,6 +110,9 @@ export async function updateQuote(id: string, raw: QuoteFormInput): Promise<{ id
         lineasJson: JSON.stringify(lineas),
         total,
         abono,
+        // fecha/vigenciaDias may have changed, so let the expiration cron
+        // re-evaluate this quote instead of treating it as already alerted.
+        alertaVencimientoEnviada: false,
         items: {
           create: input.items.map((it, order) => ({
             order,
@@ -138,7 +141,15 @@ export async function setEstado(id: string, estado: "pendiente" | "aprobada" | "
   const session = await auth();
   if (!session?.user) throw new Error("No autenticado.");
 
-  await prisma.quote.update({ where: { id }, data: { estado } });
+  await prisma.quote.update({
+    where: { id },
+    data: {
+      estado,
+      // Reopening a quote back to pendiente should let the expiration cron
+      // alert on it again once its vigencia is reached.
+      alertaVencimientoEnviada: estado === "pendiente" ? false : undefined,
+    },
+  });
   revalidatePath("/cotizaciones");
   revalidatePath(`/cotizaciones/${id}`);
 }

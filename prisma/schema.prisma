@@ -69,6 +69,11 @@ model Quote {
 
   estado Estado @default(pendiente)
 
+  // Set once the day-7 "about to expire" reminder email has gone out, so the
+  // daily cron doesn't re-send it. Cleared whenever the quote is edited (the
+  // expiration date may have moved) or reopened back to pendiente.
+  alertaVencimientoEnviada Boolean @default(false)
+
   // Computed snapshot (JSON: { label, value }[]) + totals, in CLP.
   lineasJson String @default("[]")
   total      Int    @default(0)

@@ -55,12 +55,12 @@ export default async function CotizacionesPage({
           <table className="w-full border-collapse min-w-[820px]">
             <thead>
               <tr className="bg-[#f8fafc] text-left">
-                {["N°", "Cliente", "Ítems", "Tramo", "Fecha", "Total", "Estado", "Acciones"].map(
+                {["N°", "Cliente", "Ítems", "Tramo", "N° Viaje", "Fecha", "Total", "Estado", "Acciones"].map(
                   (h, i) => (
                     <th
                       key={h}
                       className={`px-4 py-3 text-xs text-[#64748b] font-bold uppercase tracking-wide ${
-                        i === 5 ? "text-right" : ""
+                        i === 6 ? "text-right" : ""
                       }`}
                     >
                       {h}
@@ -82,6 +82,9 @@ export default async function CotizacionesPage({
                   </td>
                   <td className="px-4 py-3.5 text-[13px] text-[#334155] whitespace-nowrap">
                     {DIRECCION_LABEL[q.direccion as Direccion]}
+                  </td>
+                  <td className="px-4 py-3.5 text-sm text-[#475569] whitespace-nowrap">
+                    {q.viajeN || "—"}
                   </td>
                   <td className="px-4 py-3.5 text-sm text-[#475569]">{fmtDate(q.fecha)}</td>
                   <td className="px-4 py-3.5 text-sm font-bold text-right text-[#0e2a43]">
