@@ -18,6 +18,7 @@ export default function Topbar({ nombre, isAdmin }: { nombre: string; isAdmin: b
   const pathname = usePathname();
   const isList = pathname === "/cotizaciones";
   const isNew = pathname?.startsWith("/cotizaciones/nueva");
+  const isEstadisticas = pathname?.startsWith("/estadisticas");
   const isEmpleados = pathname?.startsWith("/empleados");
 
   return (
@@ -41,6 +42,9 @@ export default function Topbar({ nombre, isAdmin }: { nombre: string; isAdmin: b
         </Link>
         <Link href="/cotizaciones/nueva" className={navBtnClass(!!isNew)}>
           + Nueva cotización
+        </Link>
+        <Link href="/estadisticas" className={navBtnClass(!!isEstadisticas)}>
+          Estadísticas
         </Link>
         {isAdmin && (
           <Link href="/empleados" className={navBtnClass(!!isEmpleados)}>
