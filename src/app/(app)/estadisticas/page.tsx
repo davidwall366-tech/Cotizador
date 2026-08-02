@@ -25,7 +25,7 @@ export default async function EstadisticasPage({
   const desde = rangoDesde(periodo);
 
   const quotes = await prisma.quote.findMany({
-    where: desde ? { fecha: { gte: desde } } : {},
+    where: { fecha: { gte: desde } },
     select: { fecha: true, estado: true, total: true },
   });
 

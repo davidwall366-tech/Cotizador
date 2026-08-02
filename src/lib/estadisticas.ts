@@ -38,14 +38,18 @@ function mesesDelPeriodo(periodo: string): number | null {
   return meses ?? null;
 }
 
-// null means "sin límite inferior" (periodo "todo").
+// Las estadísticas parten en agosto 2026 — las cotizaciones de prueba
+// anteriores a esa fecha no se cuentan, ni siquiera con el filtro "Todo".
+export const ESTADISTICAS_EPOCH = new Date(Date.UTC(2026, 7, 1));
+
 // `fecha` is stored as a UTC date-only value (see fmtDate in pricing.ts, which
 // reads it via toISOString() for the same reason) — every month calculation
 // here must use the UTC getters, or dates shift a day/month in local time.
-export function rangoDesde(periodo: string, ahora = new Date()): Date | null {
+export function rangoDesde(periodo: string, ahora = new Date()): Date {
   const meses = mesesDelPeriodo(periodo);
-  if (meses === null) return null;
-  return new Date(Date.UTC(ahora.getUTCFullYear(), ahora.getUTCMonth() - (meses - 1), 1));
+  if (meses === null) return ESTADISTICAS_EPOCH;
+  const calculado = new Date(Date.UTC(ahora.getUTCFullYear(), ahora.getUTCMonth() - (meses - 1), 1));
+  return calculado < ESTADISTICAS_EPOCH ? ESTADISTICAS_EPOCH : calculado;
 }
 
 function monthKey(d: Date): string {
@@ -54,24 +58,20 @@ function monthKey(d: Date): string {
 
 export function computeEstadisticas(
   quotes: QuoteForStats[],
-  desde: Date | null,
+  desde: Date,
   hasta = new Date()
 ): Estadisticas {
   const porEstado: Record<Estado, number> = { pendiente: 0, aprobada: 0, rechazada: 0 };
   let montoTotal = 0;
   let montoAprobado = 0;
 
-  const primeraFecha = quotes.reduce<Date | null>(
-    (min, q) => (min === null || q.fecha < min ? q.fecha : min),
-    null
-  );
-  const inicio = desde ?? primeraFecha ?? hasta;
-  const inicioMes = new Date(Date.UTC(inicio.getUTCFullYear(), inicio.getUTCMonth(), 1));
+  const inicioMes = new Date(Date.UTC(desde.getUTCFullYear(), desde.getUTCMonth(), 1));
   const finMes = new Date(Date.UTC(hasta.getUTCFullYear(), hasta.getUTCMonth(), 1));
+  const finMesEfectivo = finMes < inicioMes ? inicioMes : finMes;
 
   const buckets = new Map<string, MonthBucket>();
   const cursor = new Date(inicioMes);
-  while (cursor <= finMes) {
+  while (cursor <= finMesEfectivo) {
     buckets.set(monthKey(cursor), {
       key: monthKey(cursor),
       label: `${MES_LABEL[cursor.getUTCMonth()]} ${cursor.getUTCFullYear()}`,
