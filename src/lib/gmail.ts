@@ -17,7 +17,7 @@ function getTransport() {
 
 export interface SendQuoteEmailInput {
   to: string;
-  cc?: string;
+  cc?: string[];
   numero: number;
   cliente: string;
   vendedor: string;
@@ -33,14 +33,14 @@ export async function sendQuoteEmail(input: SendQuoteEmailInput): Promise<void> 
   await transport.sendMail({
     from: `"Naviera GV" <${process.env.GMAIL_USER}>`,
     to: input.to,
-    cc: input.cc,
+    cc: input.cc?.length ? input.cc : undefined,
     subject: `Cotización N° ${input.numero} — Naviera GV`,
     text:
       `Estimado/a ${input.cliente},\n\n` +
       `Junto con saludarle, adjunto la cotización N° ${input.numero} solicitada.\n\n` +
       `Quedamos atentos a sus comentarios.\n\n` +
       `Atentamente,\n${input.vendedor}\n` +
-      `Naviera GV S.A. · +56 32 239 1749`,
+      `Naviera GV S.A. · +56 9 7512 4982`,
     attachments: [
       {
         filename: `cotizacion-${input.numero}.pdf`,

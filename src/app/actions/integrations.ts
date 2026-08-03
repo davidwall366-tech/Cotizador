@@ -41,9 +41,18 @@ export async function sendQuoteByEmail(quoteId: string): Promise<void> {
 
   const pdf = await renderQuotePdf(quoteId);
 
-  // Always cc whoever created the quote, so they keep a record of what was
-  // sent — no opt-in checkbox needed.
-  const cc = quote.createdBy?.email || undefined;
+  // Always cc whoever created the quote (so they keep a record of what was
+  // sent) and every active administrator — no opt-in checkbox needed.
+  const admins = await prisma.user.findMany({
+    where: { role: "ADMIN", active: true, email: { not: null } },
+  });
+  const cc = Array.from(
+    new Set(
+      [quote.createdBy?.email, ...admins.map((a) => a.email)].filter(
+        (e): e is string => Boolean(e) && e !== quote.correo
+      )
+    )
+  );
 
   await sendQuoteEmail({
     to: quote.correo,
