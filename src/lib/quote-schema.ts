@@ -30,7 +30,7 @@ export const quoteFormSchema = z.object({
   fecha: z.string().min(1),
   vigenciaDias: z.coerce.number().int().positive().default(7),
   vendedor: z.string().optional().default(""),
-  viajeN: z.string().optional().default(""),
+  viajeN: z.string().trim().min(1, "El N° de viaje es obligatorio"),
   zarpe: z.string().optional().default(""),
   plazoRecepcion: z.string().optional().default(""),
   notas: z.string().optional().default(""),

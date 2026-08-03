@@ -62,6 +62,7 @@ export default function QuoteForm({
   const cannotSave =
     !form.cliente ||
     !form.correo ||
+    !form.viajeN.trim() ||
     form.items.length === 0 ||
     !form.items.every((it) => itemValid(itemStateToInput(it)));
 
@@ -254,7 +255,7 @@ export default function QuoteForm({
             </div>
           </div>
           <div>
-            <label className={lblStyle}>N° de viaje</label>
+            <label className={lblStyle}>N° de viaje *</label>
             <input
               value={form.viajeN}
               onChange={(e) => patchForm({ viajeN: e.target.value })}
