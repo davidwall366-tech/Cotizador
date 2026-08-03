@@ -18,7 +18,7 @@ export default function IntegrationActions({
     startTransition(async () => {
       try {
         await sendQuoteByEmail(quoteId);
-        setMessage("Correo enviado al cliente (con copia a quien creó la cotización).");
+        setMessage("Correo enviado al cliente (con copia al administrador y a quien creó la cotización).");
       } catch (e) {
         setMessage(e instanceof Error ? e.message : "No se pudo enviar el correo.");
       }
