@@ -2,9 +2,10 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-guard";
 import { fmtDate } from "@/lib/pricing";
+import DeleteEmployeeButton from "@/components/DeleteEmployeeButton";
 
 export default async function EmpleadosPage() {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
   const empleados = await prisma.user.findMany({
     orderBy: [{ active: "desc" }, { role: "asc" }, { nombre: "asc" }],
@@ -72,12 +73,15 @@ export default async function EmpleadosPage() {
                   </td>
                   <td className="px-4 py-3.5 text-sm text-[#475569]">{fmtDate(u.createdAt)}</td>
                   <td className="px-4 py-3.5">
-                    <Link
-                      href={`/empleados/${u.id}/editar`}
-                      className="bg-transparent border border-[#d7dee6] text-[#0e2a43] rounded-[7px] px-2.5 py-[7px] text-[13px] inline-block"
-                    >
-                      Editar
-                    </Link>
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/empleados/${u.id}/editar`}
+                        className="bg-transparent border border-[#d7dee6] text-[#0e2a43] rounded-[7px] px-2.5 py-[7px] text-[13px] inline-block"
+                      >
+                        Editar
+                      </Link>
+                      <DeleteEmployeeButton id={u.id} nombre={u.nombre} disabled={u.id === admin.id} />
+                    </div>
                   </td>
                 </tr>
               ))}

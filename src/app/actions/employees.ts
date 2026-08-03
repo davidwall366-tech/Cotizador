@@ -87,3 +87,27 @@ export async function updateEmployee(id: string, raw: EmployeeUpdateInput): Prom
   revalidatePath("/empleados");
   revalidatePath(`/empleados/${id}/editar`);
 }
+
+export async function deleteEmployee(id: string): Promise<void> {
+  const admin = await requireAdminForAction();
+
+  if (admin.id === id) {
+    throw new Error("No puedes eliminar tu propia cuenta.");
+  }
+
+  const target = await prisma.user.findUnique({ where: { id } });
+  if (!target) throw new Error("Empleado no encontrado.");
+
+  // Safety: never leave the system with zero admin accounts.
+  if (target.role === "ADMIN") {
+    const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
+    if (adminCount <= 1) {
+      throw new Error("Debe quedar al menos un administrador — no puedes eliminar el último.");
+    }
+  }
+
+  // Quotes created by this user keep their frozen `vendedor` snapshot;
+  // Quote.createdById is ON DELETE SET NULL so this never fails on quote history.
+  await prisma.user.delete({ where: { id } });
+  revalidatePath("/empleados");
+}
