@@ -33,6 +33,10 @@ export interface QuoteFormState {
   cliente: string;
   clienteRut: string;
   mostrarRut: boolean;
+  clienteDireccion: string;
+  mostrarDireccion: boolean;
+  clienteTelefono: string;
+  mostrarTelefono: boolean;
   correo: string;
   numero: string;
   fecha: string;

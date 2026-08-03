@@ -11,6 +11,7 @@ import {
   type Tarifas,
 } from "@/lib/pricing";
 import { createQuote, updateQuote } from "@/app/actions/quotes";
+import { formatRut } from "@/lib/rut";
 import ItemCard from "./ItemCard";
 import { blankItemState, type QuoteFormState } from "./types";
 import { formStateToPayload, itemStateToInput } from "./convert";
@@ -148,7 +149,7 @@ export default function QuoteForm({
             <label className={lblStyle}>RUT del cliente</label>
             <input
               value={form.clienteRut}
-              onChange={(e) => patchForm({ clienteRut: e.target.value })}
+              onChange={(e) => patchForm({ clienteRut: formatRut(e.target.value) })}
               placeholder="Ej: 12.345.678-9"
               className={inputStyle}
             />
@@ -159,6 +160,40 @@ export default function QuoteForm({
                 onChange={(e) => patchForm({ mostrarRut: e.target.checked })}
               />
               Incluir el RUT en la cotización
+            </label>
+          </div>
+          <div>
+            <label className={lblStyle}>Dirección del cliente</label>
+            <input
+              value={form.clienteDireccion}
+              onChange={(e) => patchForm({ clienteDireccion: e.target.value })}
+              placeholder="Ej: Av. Siempre Viva 123, Valparaíso"
+              className={inputStyle}
+            />
+            <label className="flex items-center gap-1.5 text-xs text-[#64748b] mt-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.mostrarDireccion}
+                onChange={(e) => patchForm({ mostrarDireccion: e.target.checked })}
+              />
+              Incluir la dirección en la cotización
+            </label>
+          </div>
+          <div>
+            <label className={lblStyle}>Teléfono del cliente</label>
+            <input
+              value={form.clienteTelefono}
+              onChange={(e) => patchForm({ clienteTelefono: e.target.value })}
+              placeholder="Ej: +56 9 1234 5678"
+              className={inputStyle}
+            />
+            <label className="flex items-center gap-1.5 text-xs text-[#64748b] mt-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.mostrarTelefono}
+                onChange={(e) => patchForm({ mostrarTelefono: e.target.checked })}
+              />
+              Incluir el teléfono en la cotización
             </label>
           </div>
           <div>

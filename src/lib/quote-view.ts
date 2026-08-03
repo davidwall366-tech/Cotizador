@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { formatRut } from "@/lib/rut";
 import type { Condicion, Direccion, LineaCosto, QuoteItemInput, TipoItem } from "@/lib/pricing";
 import {
   DIRECCION_LABEL,
@@ -56,6 +57,10 @@ export interface QuoteDocumentViewModel {
   cliente: string;
   clienteRut: string;
   mostrarRut: boolean;
+  clienteDireccion: string;
+  mostrarDireccion: boolean;
+  clienteTelefono: string;
+  mostrarTelefono: boolean;
   correo: string;
   intro: string;
   viajeN: string;
@@ -87,8 +92,12 @@ export function buildQuoteDocumentViewModel(quote: QuoteWithRelations): QuoteDoc
     tipoLabel: tipoLabelOf(items),
     estado: ESTADO_COLORS[quote.estado],
     cliente: quote.cliente,
-    clienteRut: quote.clienteRut,
+    clienteRut: formatRut(quote.clienteRut),
     mostrarRut: quote.mostrarRut,
+    clienteDireccion: quote.clienteDireccion,
+    mostrarDireccion: quote.mostrarDireccion,
+    clienteTelefono: quote.clienteTelefono,
+    mostrarTelefono: quote.mostrarTelefono,
     correo: quote.correo,
     intro: introForTipos(tiposPresentes),
     viajeN: quote.viajeN || "—",

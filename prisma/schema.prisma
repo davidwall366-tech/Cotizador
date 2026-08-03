@@ -60,19 +60,24 @@ model Quote {
   id     String @id @default(cuid())
   numero Int    @unique
 
-  direccion      Direccion @default(ida)
-  cliente        String
-  clienteRut     String    @default("")
-  // Whether clienteRut should be printed on the formal document.
-  mostrarRut     Boolean   @default(false)
-  correo         String
-  fecha          DateTime
-  vigenciaDias   Int       @default(7)
-  vendedor       String    @default("")
-  viajeN         String    @default("")
-  zarpe          String    @default("")
-  plazoRecepcion String    @default("")
-  notas          String    @default("")
+  direccion        Direccion @default(ida)
+  cliente          String
+  clienteRut       String    @default("")
+  // Whether clienteRut/clienteDireccion/clienteTelefono should each be
+  // printed on the formal document — independently toggled per quote.
+  mostrarRut       Boolean   @default(false)
+  clienteDireccion String    @default("")
+  mostrarDireccion Boolean   @default(false)
+  clienteTelefono  String    @default("")
+  mostrarTelefono  Boolean   @default(false)
+  correo           String
+  fecha            DateTime
+  vigenciaDias     Int       @default(7)
+  vendedor         String    @default("")
+  viajeN           String    @default("")
+  zarpe            String    @default("")
+  plazoRecepcion   String    @default("")
+  notas            String    @default("")
 
   estado Estado @default(pendiente)
 

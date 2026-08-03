@@ -41,9 +41,14 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
         </div>
 
         <p className="text-sm leading-[1.7] text-[#334155]">
-          Estimado/a <b>{vm.cliente}</b>
-          {vm.mostrarRut && vm.clienteRut ? ` (RUT ${vm.clienteRut})` : ""},
+          Estimado/a <b>{vm.cliente}</b>,
         </p>
+        <div className="text-sm leading-[1.6] text-[#334155] mb-3">
+          {vm.mostrarRut && vm.clienteRut && <div>RUT: {vm.clienteRut}</div>}
+          {vm.mostrarDireccion && vm.clienteDireccion && <div>Dirección: {vm.clienteDireccion}</div>}
+          {vm.mostrarTelefono && vm.clienteTelefono && <div>Teléfono: {vm.clienteTelefono}</div>}
+          {vm.correo && <div>Correo: {vm.correo}</div>}
+        </div>
         <p className="text-sm leading-[1.7] text-[#334155]">
           Junto con saludarle, adjunto la cotización formal para {vm.intro}. Los detalles, así como
           las condiciones comerciales y operacionales, se detallan a continuación:
