@@ -36,6 +36,16 @@ export interface QuoteItemInput {
 export interface LineaCosto {
   label: string;
   value: number;
+  /** Index of the source QuoteItemInput this line came from — used to group
+   *  lines by item for display. Absent on lines from quotes saved before this
+   *  field existed; those are rendered as one line per group (see
+   *  agruparLineasPorItem). */
+  itemIndex?: number;
+}
+
+export interface LineaGrupo {
+  lineas: LineaCosto[];
+  subtotal: number;
 }
 
 export interface TipoMeta {
@@ -301,10 +311,32 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
 }
 
 export function computeQuoteTotals(items: QuoteItemInput[], direccion: Direccion, tarifas: Tarifas) {
-  const lineas = items.flatMap((it) => computeLineas(it, direccion, tarifas));
+  const lineas = items.flatMap((it, idx) =>
+    computeLineas(it, direccion, tarifas).map((l) => ({ ...l, itemIndex: idx }))
+  );
   const total = lineas.reduce((s, l) => s + l.value, 0);
   const abono = Math.round(total / 2);
   return { lineas, total, abono };
+}
+
+/** Groups a flat cost-line list by source item, so the UI can show a
+ *  separator + subtotal after each item's lines. Lines without itemIndex
+ *  (quotes saved before this field existed) each form their own group of
+ *  one, so no spurious subtotal is shown for them. */
+export function agruparLineasPorItem(lineas: LineaCosto[]): LineaGrupo[] {
+  const grupos: LineaGrupo[] = [];
+  let lastKey: string | null = null;
+  lineas.forEach((l, i) => {
+    const key = l.itemIndex !== undefined ? `g${l.itemIndex}` : `u${i}`;
+    if (key !== lastKey) {
+      grupos.push({ lineas: [], subtotal: 0 });
+      lastKey = key;
+    }
+    const grupo = grupos[grupos.length - 1];
+    grupo.lineas.push(l);
+    grupo.subtotal += l.value;
+  });
+  return grupos;
 }
 
 /** Point 3 — "El servicio incluye" bullets, built from the item types present. */
@@ -370,7 +402,7 @@ export function condicionesForTipos(tiposPresentes: TipoItem[], vigenciaDias: nu
   }
   lines.push("Verificación de medidas: las dimensiones y volumen definitivos se corroborarán al momento de la recepción.");
   lines.push(
-    "Documentación de valor: es obligatorio entregar la carga acompañada de los documentos que acrediten su valor comercial para efectos de cobertura del seguro."
+    "Documentación de valor: es obligatorio entregar la carga acompañada de los documentos que acrediten su valor comercial para efectos de cobertura del seguro. El seguro cubre exclusivamente el hundimiento de la nave."
   );
   lines.push(`La vigencia de esta cotización es de ${vigenciaDias || 7} días desde su emisión para efectuar el abono de reserva.`);
 

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { fmtCLP } from "@/lib/pricing";
+import { agruparLineasPorItem, fmtCLP } from "@/lib/pricing";
 import type { QuoteDocumentViewModel } from "@/lib/quote-view";
 
 export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
@@ -66,10 +66,20 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
           2. Detalle de valores (exentos de IVA)
         </div>
         <div className="border border-[#eef1f4] rounded-lg overflow-hidden">
-          {vm.lineas.map((l, i) => (
-            <div key={i} className="flex justify-between px-4 py-2.5 text-[13px] border-b border-[#eef1f4]">
-              <div className="text-[#334155]">{l.label}</div>
-              <div className="font-semibold text-[#0e2a43]">{fmtCLP(l.value)}</div>
+          {agruparLineasPorItem(vm.lineas).map((g, gi) => (
+            <div key={gi}>
+              {g.lineas.map((l, li) => (
+                <div key={li} className="flex justify-between px-4 py-2.5 text-[13px] border-b border-[#eef1f4]">
+                  <div className="text-[#334155]">{l.label}</div>
+                  <div className="font-semibold text-[#0e2a43]">{fmtCLP(l.value)}</div>
+                </div>
+              ))}
+              {g.lineas.length > 1 && (
+                <div className="flex justify-between px-4 py-2 text-xs bg-[#fafbfc] border-b border-[#eef1f4] font-bold text-[#0e2a43]">
+                  <div>Subtotal ítem</div>
+                  <div>{fmtCLP(g.subtotal)}</div>
+                </div>
+              )}
             </div>
           ))}
           <div className="flex justify-between px-4 py-3 text-sm bg-[#f8fafc] font-extrabold text-[#0e2a43]">

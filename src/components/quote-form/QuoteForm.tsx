@@ -2,7 +2,14 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { computeQuoteTotals, fmtCLP, itemValid, type QuoteItemInput, type Tarifas } from "@/lib/pricing";
+import {
+  agruparLineasPorItem,
+  computeQuoteTotals,
+  fmtCLP,
+  itemValid,
+  type QuoteItemInput,
+  type Tarifas,
+} from "@/lib/pricing";
 import { createQuote, updateQuote } from "@/app/actions/quotes";
 import ItemCard from "./ItemCard";
 import { blankItemState, type QuoteFormState } from "./types";
@@ -49,6 +56,7 @@ export default function QuoteForm({
     () => computeQuoteTotals(itemInputs, form.direccion, tarifas),
     [itemInputs, form.direccion, tarifas]
   );
+  const grupos = useMemo(() => agruparLineasPorItem(lineas), [lineas]);
 
   const cannotSave =
     !form.cliente ||
@@ -251,13 +259,21 @@ export default function QuoteForm({
 
       <div className="bg-[#fff8ec] border border-[#f5d99a] rounded-xl p-[22px] mb-[22px]">
         <div className="text-sm font-bold text-[#0e2a43] mb-3.5">Resumen de costos (exentos de IVA)</div>
-        {lineas.map((l, i) => (
-          <div
-            key={i}
-            className="flex justify-between text-sm text-[#374151] py-1.5 border-b border-[#f1e3c2]"
-          >
-            <div>{l.label}</div>
-            <div className="font-semibold">{fmtCLP(l.value)}</div>
+        {grupos.map((g, gi) => (
+          <div key={gi}>
+            {g.lineas.map((l, li) => (
+              <div key={li} className="flex justify-between text-sm text-[#374151] py-1.5">
+                <div>{l.label}</div>
+                <div className="font-semibold">{fmtCLP(l.value)}</div>
+              </div>
+            ))}
+            {g.lineas.length > 1 && (
+              <div className="flex justify-between text-[13px] text-[#8a6d1f] font-bold pt-0.5 pb-1.5">
+                <div>Subtotal ítem</div>
+                <div>{fmtCLP(g.subtotal)}</div>
+              </div>
+            )}
+            <div className="border-b-2 border-[#e8c877] mb-1.5" />
           </div>
         ))}
         <div className="flex justify-between text-base text-[#0e2a43] pt-3 pb-1 font-extrabold">
