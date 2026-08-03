@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { computeQuoteTotals, mkItem, type QuoteItemInput, type Direccion } from "../src/lib/pricing";
+import { computeQuoteTotals, mkItem, DEFAULT_TARIFAS, type QuoteItemInput, type Direccion } from "../src/lib/pricing";
 
 const prisma = new PrismaClient();
 
@@ -39,7 +39,7 @@ async function seedQuote(opts: {
   if (existing) return;
 
   const direccion = opts.direccion ?? "ida";
-  const { lineas, total, abono } = computeQuoteTotals(opts.items, direccion);
+  const { lineas, total, abono } = computeQuoteTotals(opts.items, direccion, DEFAULT_TARIFAS);
 
   await prisma.quote.create({
     data: {

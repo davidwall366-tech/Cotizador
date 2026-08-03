@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import { requireAdminForAction } from "@/lib/admin-guard";
 import { computeQuoteTotals, itemValid, type QuoteItemInput } from "@/lib/pricing";
+import { getTarifas } from "@/lib/tarifas";
 import { quoteFormSchema, type QuoteFormInput } from "@/lib/quote-schema";
 import { autoExportQuoteToDropbox } from "@/app/actions/integrations";
 
@@ -38,14 +40,21 @@ export async function createQuote(raw: QuoteFormInput): Promise<{ id: string }> 
   const input = quoteFormSchema.parse(raw);
   validateBusinessRules(input);
 
+  // The "N° de cotización" field is locked to non-admins in the UI; enforce
+  // it server-side too so a crafted request can't pick an arbitrary number.
+  const numero = session.user.role === "ADMIN" ? input.numero : await getNextNumero();
+
   const itemInputs = toItemInputs(input.items);
-  const { lineas, total, abono } = computeQuoteTotals(itemInputs, input.direccion);
+  const tarifas = await getTarifas();
+  const { lineas, total, abono } = computeQuoteTotals(itemInputs, input.direccion, tarifas);
 
   const quote = await prisma.quote.create({
     data: {
-      numero: input.numero,
+      numero,
       direccion: input.direccion,
       cliente: input.cliente,
+      clienteRut: input.clienteRut,
+      mostrarRut: input.mostrarRut,
       correo: input.correo,
       fecha: new Date(input.fecha),
       vigenciaDias: input.vigenciaDias,
@@ -88,17 +97,28 @@ export async function updateQuote(id: string, raw: QuoteFormInput): Promise<{ id
   const input = quoteFormSchema.parse(raw);
   validateBusinessRules(input);
 
+  // Same server-side lock as createQuote: only an admin may change the number.
+  let numero = input.numero;
+  if (session.user.role !== "ADMIN") {
+    const existing = await prisma.quote.findUnique({ where: { id }, select: { numero: true } });
+    if (!existing) throw new Error("Cotización no encontrada.");
+    numero = existing.numero;
+  }
+
   const itemInputs = toItemInputs(input.items);
-  const { lineas, total, abono } = computeQuoteTotals(itemInputs, input.direccion);
+  const tarifas = await getTarifas();
+  const { lineas, total, abono } = computeQuoteTotals(itemInputs, input.direccion, tarifas);
 
   await prisma.$transaction([
     prisma.quoteItem.deleteMany({ where: { quoteId: id } }),
     prisma.quote.update({
       where: { id },
       data: {
-        numero: input.numero,
+        numero,
         direccion: input.direccion,
         cliente: input.cliente,
+        clienteRut: input.clienteRut,
+        mostrarRut: input.mostrarRut,
         correo: input.correo,
         fecha: new Date(input.fecha),
         vigenciaDias: input.vigenciaDias,
@@ -155,8 +175,7 @@ export async function setEstado(id: string, estado: "pendiente" | "aprobada" | "
 }
 
 export async function deleteQuote(id: string) {
-  const session = await auth();
-  if (!session?.user) throw new Error("No autenticado.");
+  await requireAdminForAction();
 
   await prisma.quote.delete({ where: { id } });
   revalidatePath("/cotizaciones");

@@ -19,6 +19,8 @@ const itemSchema = z.object({
 export const quoteFormSchema = z.object({
   direccion: z.enum(["ida", "vuelta"]).default("ida"),
   cliente: z.string().min(1, "El cliente es obligatorio"),
+  clienteRut: z.string().optional().default(""),
+  mostrarRut: z.boolean().optional().default(false),
   correo: z.string().email("Correo inválido"),
   numero: z.coerce.number().int().positive(),
   fecha: z.string().min(1),

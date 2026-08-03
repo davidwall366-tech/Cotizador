@@ -31,6 +31,8 @@ export function blankItemState(tipo: TipoItem = "vehiculo"): ItemState {
 export interface QuoteFormState {
   direccion: "ida" | "vuelta";
   cliente: string;
+  clienteRut: string;
+  mostrarRut: boolean;
   correo: string;
   numero: string;
   fecha: string;

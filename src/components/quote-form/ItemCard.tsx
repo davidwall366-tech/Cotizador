@@ -1,6 +1,6 @@
 "use client";
 
-import { TIPOS_META, TIPO_ORDER, fmtCLP, type Direccion } from "@/lib/pricing";
+import { TIPOS_META, TIPO_ORDER, fmtCLP, type Direccion, type Tarifas } from "@/lib/pricing";
 import { itemStateToInput } from "./convert";
 import { computeLineas } from "@/lib/pricing";
 import type { ItemState } from "./types";
@@ -13,12 +13,14 @@ const inputStyle =
 export default function ItemCard({
   item,
   direccion,
+  tarifas,
   removeDisabled,
   onChange,
   onRemove,
 }: {
   item: ItemState;
   direccion: Direccion;
+  tarifas: Tarifas;
   removeDisabled: boolean;
   onChange: (patch: Partial<ItemState>) => void;
   onRemove: () => void;
@@ -35,7 +37,7 @@ export default function ItemCard({
       validRows.reduce((sum, v) => sum + Number(v.largo) * Number(v.ancho) * Number(v.alto), 0) * 100
     ) / 100;
 
-  const subtotal = computeLineas(itemStateToInput(item), direccion).reduce((s, l) => s + l.value, 0);
+  const subtotal = computeLineas(itemStateToInput(item), direccion, tarifas).reduce((s, l) => s + l.value, 0);
 
   const meta = TIPOS_META[item.tipo];
 

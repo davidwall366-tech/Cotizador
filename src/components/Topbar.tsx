@@ -20,6 +20,7 @@ export default function Topbar({ nombre, isAdmin }: { nombre: string; isAdmin: b
   const isNew = pathname?.startsWith("/cotizaciones/nueva");
   const isEstadisticas = pathname?.startsWith("/estadisticas");
   const isEmpleados = pathname?.startsWith("/empleados");
+  const isTarifas = pathname?.startsWith("/tarifas");
 
   return (
     <div className="no-print bg-[#0e2a43] text-white px-7 py-3 min-h-16 flex items-center justify-between flex-wrap gap-3">
@@ -49,6 +50,11 @@ export default function Topbar({ nombre, isAdmin }: { nombre: string; isAdmin: b
         {isAdmin && (
           <Link href="/empleados" className={navBtnClass(!!isEmpleados)}>
             Empleados
+          </Link>
+        )}
+        {isAdmin && (
+          <Link href="/tarifas" className={navBtnClass(!!isTarifas)}>
+            Tarifas
           </Link>
         )}
       </div>

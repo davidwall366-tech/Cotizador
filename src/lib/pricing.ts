@@ -91,6 +91,39 @@ export const TIPOS_META: Record<TipoItem, TipoMeta> = {
   },
 };
 
+/** Every configurable price used below — admin-editable via /tarifas. */
+export interface Tarifas {
+  maritimoIdaVehiculo: number;
+  maritimoIdaOtros: number;
+  maritimoVuelta: number;
+  gruaVehiculo: number;
+  fabricacionCajon266: number;
+  fabricacionCajon173: number;
+  fabricacionCajon231: number;
+  fundaProteccion: number;
+  zunchos: number;
+  tapas: number;
+  consolidacionPorM3: number;
+  arriendoContenedor10: number;
+}
+
+// Used wherever a caller hasn't loaded the current rates from the database
+// yet (e.g. as a fallback) — matches the Tarifa migration's column defaults.
+export const DEFAULT_TARIFAS: Tarifas = {
+  maritimoIdaVehiculo: 255800,
+  maritimoIdaOtros: 240800,
+  maritimoVuelta: 132800,
+  gruaVehiculo: 95000,
+  fabricacionCajon266: 84000,
+  fabricacionCajon173: 66000,
+  fabricacionCajon231: 84000,
+  fundaProteccion: 21000,
+  zunchos: 0,
+  tapas: 0,
+  consolidacionPorM3: 11000,
+  arriendoContenedor10: 45000,
+};
+
 export const TIPO_ORDER: TipoItem[] = [
   "vehiculo",
   "carga_general",
@@ -117,9 +150,9 @@ export function fmtDate(iso: string | Date | null | undefined): string {
   return y && m && d ? `${d}-${m}-${y}` : isoStr;
 }
 
-export function maritimoRate(tipo: TipoItem, direccion: Direccion): number {
-  if (direccion === "vuelta") return 132800;
-  return tipo === "vehiculo" ? 255800 : 240800;
+export function maritimoRate(tipo: TipoItem, direccion: Direccion, tarifas: Tarifas): number {
+  if (direccion === "vuelta") return tarifas.maritimoVuelta;
+  return tipo === "vehiculo" ? tarifas.maritimoIdaVehiculo : tarifas.maritimoIdaOtros;
 }
 
 export function blankItem(tipo: TipoItem = "vehiculo"): QuoteItemInput {
@@ -160,9 +193,9 @@ export function tipoLabelOf(items: QuoteItemInput[]): string {
 }
 
 /** Computes the itemized cost lines for a single quote item. */
-export function computeLineas(item: QuoteItemInput, direccion: Direccion): LineaCosto[] {
+export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifas: Tarifas): LineaCosto[] {
   const tipo = item.tipo;
-  const rate = maritimoRate(tipo, direccion);
+  const rate = maritimoRate(tipo, direccion, tarifas);
   const lineas: LineaCosto[] = [];
 
   if (tipo === "vehiculo") {
@@ -178,9 +211,9 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion): Linea
     });
     const gruaLabel =
       direccion === "vuelta"
-        ? `Camión Grúa - traslado a bodega de acopio en Quilpué (${count} vehículo${count === 1 ? "" : "s"} × $95.000)`
-        : `Camión Grúa - traslado a puerto (${count} vehículo${count === 1 ? "" : "s"} × $95.000)`;
-    lineas.push({ label: gruaLabel, value: count * 95000 });
+        ? `Camión Grúa - traslado a bodega de acopio en Quilpué (${count} vehículo${count === 1 ? "" : "s"} × ${fmtRate(tarifas.gruaVehiculo)})`
+        : `Camión Grúa - traslado a puerto (${count} vehículo${count === 1 ? "" : "s"} × ${fmtRate(tarifas.gruaVehiculo)})`;
+    lineas.push({ label: gruaLabel, value: count * tarifas.gruaVehiculo });
   } else if (tipo === "carga_general") {
     const m3 = Number(item.cargaM3) || 0;
     const desc = (item.cargaDesc || "").trim();
@@ -197,9 +230,14 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion): Linea
   } else if (tipo === "cajon266") {
     const qty = Number(item.cajonCantidad) || 0;
     if (direccion !== "vuelta") {
-      lineas.push({ label: `Fabricación de Cajón 2,66 m³ × ${qty}`, value: 84000 * qty });
-      lineas.push({ label: `Funda de Protección × ${qty}`, value: 21000 * qty });
-      lineas.push({ label: `Consolidación (2,66 m³ × $11.000/m³) × ${qty}`, value: 29260 * qty });
+      lineas.push({ label: `Fabricación de Cajón 2,66 m³ × ${qty}`, value: tarifas.fabricacionCajon266 * qty });
+      lineas.push({ label: `Funda de Protección × ${qty}`, value: tarifas.fundaProteccion * qty });
+      if (tarifas.zunchos > 0) lineas.push({ label: `Zunchos × ${qty}`, value: tarifas.zunchos * qty });
+      if (tarifas.tapas > 0) lineas.push({ label: `Tapas × ${qty}`, value: tarifas.tapas * qty });
+      lineas.push({
+        label: `Consolidación (2,66 m³ × ${fmtRate(tarifas.consolidacionPorM3)}/m³) × ${qty}`,
+        value: Math.round(2.66 * tarifas.consolidacionPorM3) * qty,
+      });
     }
     lineas.push({
       label: `Transporte Marítimo (2,66 m³ × ${fmtRate(rate)}/m³) × ${qty}`,
@@ -208,9 +246,14 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion): Linea
   } else if (tipo === "cajon173") {
     const qty = Number(item.cajonCantidad) || 0;
     if (direccion !== "vuelta") {
-      lineas.push({ label: `Fabricación de Cajón 1,73 m³ × ${qty}`, value: 66000 * qty });
-      lineas.push({ label: `Funda de Protección × ${qty}`, value: 21000 * qty });
-      lineas.push({ label: `Consolidación (1,73 m³ × $11.000/m³) × ${qty}`, value: 19030 * qty });
+      lineas.push({ label: `Fabricación de Cajón 1,73 m³ × ${qty}`, value: tarifas.fabricacionCajon173 * qty });
+      lineas.push({ label: `Funda de Protección × ${qty}`, value: tarifas.fundaProteccion * qty });
+      if (tarifas.zunchos > 0) lineas.push({ label: `Zunchos × ${qty}`, value: tarifas.zunchos * qty });
+      if (tarifas.tapas > 0) lineas.push({ label: `Tapas × ${qty}`, value: tarifas.tapas * qty });
+      lineas.push({
+        label: `Consolidación (1,73 m³ × ${fmtRate(tarifas.consolidacionPorM3)}/m³) × ${qty}`,
+        value: Math.round(1.73 * tarifas.consolidacionPorM3) * qty,
+      });
     }
     lineas.push({
       label: `Transporte Marítimo (1,73 m³ × ${fmtRate(rate)}/m³) × ${qty}`,
@@ -219,11 +262,13 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion): Linea
   } else if (tipo === "cajon231") {
     const qty = Number(item.cajonCantidad) || 0;
     if (direccion !== "vuelta") {
-      lineas.push({ label: `Fabricación de Cajón 2,31 m³ × ${qty}`, value: 84000 * qty });
-      lineas.push({ label: `Funda de Protección × ${qty}`, value: 21000 * qty });
+      lineas.push({ label: `Fabricación de Cajón 2,31 m³ × ${qty}`, value: tarifas.fabricacionCajon231 * qty });
+      lineas.push({ label: `Funda de Protección × ${qty}`, value: tarifas.fundaProteccion * qty });
+      if (tarifas.zunchos > 0) lineas.push({ label: `Zunchos × ${qty}`, value: tarifas.zunchos * qty });
+      if (tarifas.tapas > 0) lineas.push({ label: `Tapas × ${qty}`, value: tarifas.tapas * qty });
       lineas.push({
-        label: `Consolidación (2,31 m³ × $11.000/m³) × ${qty}`,
-        value: Math.round(2.31 * 11000) * qty,
+        label: `Consolidación (2,31 m³ × ${fmtRate(tarifas.consolidacionPorM3)}/m³) × ${qty}`,
+        value: Math.round(2.31 * tarifas.consolidacionPorM3) * qty,
       });
     }
     lineas.push({
@@ -235,10 +280,10 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion): Linea
     const m3 = 21.3;
     const m3Str = "21,3";
     if (direccion !== "vuelta") {
-      lineas.push({ label: `Arriendo de Contenedor × ${qty}`, value: 45000 * qty });
+      lineas.push({ label: `Arriendo de Contenedor × ${qty}`, value: tarifas.arriendoContenedor10 * qty });
       lineas.push({
-        label: `Consolidación (${m3Str} m³ × $11.000/m³) × ${qty}`,
-        value: Math.round(m3 * 11000) * qty,
+        label: `Consolidación (${m3Str} m³ × ${fmtRate(tarifas.consolidacionPorM3)}/m³) × ${qty}`,
+        value: Math.round(m3 * tarifas.consolidacionPorM3) * qty,
       });
     }
     lineas.push({
@@ -250,8 +295,8 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion): Linea
   return lineas;
 }
 
-export function computeQuoteTotals(items: QuoteItemInput[], direccion: Direccion) {
-  const lineas = items.flatMap((it) => computeLineas(it, direccion));
+export function computeQuoteTotals(items: QuoteItemInput[], direccion: Direccion, tarifas: Tarifas) {
+  const lineas = items.flatMap((it) => computeLineas(it, direccion, tarifas));
   const total = lineas.reduce((s, l) => s + l.value, 0);
   const abono = Math.round(total / 2);
   return { lineas, total, abono };
@@ -307,6 +352,7 @@ export function condicionesForTipos(tiposPresentes: TipoItem[], vigenciaDias: nu
     lines.push(
       "Modalidad de traslado (funda de protección): si no se informa una preferencia, se asumirá que viajarán con funda. Naviera GV no se responsabiliza por desgastes derivados del transporte marítimo."
     );
+    lines.push("La recepción del vehículo puede demorar 1 hora.");
   }
   lines.push(
     "Si su carga se recibe sin embalaje, se procederá a embalarla con el costo respectivo para el cliente. En caso de que se entregue ya embalada, la empresa se reserva el derecho de reembalarla si considera que la protección actual es insuficiente para el transporte marítimo, cobrando el costo adicional que esto implique."

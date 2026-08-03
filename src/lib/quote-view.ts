@@ -54,6 +54,8 @@ export interface QuoteDocumentViewModel {
   tipoLabel: string;
   estado: { bg: string; fg: string; label: string };
   cliente: string;
+  clienteRut: string;
+  mostrarRut: boolean;
   correo: string;
   intro: string;
   viajeN: string;
@@ -85,6 +87,8 @@ export function buildQuoteDocumentViewModel(quote: QuoteWithRelations): QuoteDoc
     tipoLabel: tipoLabelOf(items),
     estado: ESTADO_COLORS[quote.estado],
     cliente: quote.cliente,
+    clienteRut: quote.clienteRut,
+    mostrarRut: quote.mostrarRut,
     correo: quote.correo,
     intro: introForTipos(tiposPresentes),
     viajeN: quote.viajeN || "—",

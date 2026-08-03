@@ -30,11 +30,7 @@ export default async function CotizacionDocumentoPage({
     <div className="flex-1 px-5 py-8 pb-[60px] flex flex-col items-center">
       <DocumentActions quoteId={quote.id} />
       <QuoteDocument vm={vm} />
-      <IntegrationActions
-        quoteId={quote.id}
-        dropboxEnabled={integrations.dropbox}
-        gmailEnabled={integrations.gmail}
-      />
+      <IntegrationActions quoteId={quote.id} gmailEnabled={integrations.gmail} />
     </div>
   );
 }

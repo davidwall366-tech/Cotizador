@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { computeQuoteTotals, fmtCLP, itemValid, type QuoteItemInput } from "@/lib/pricing";
+import { computeQuoteTotals, fmtCLP, itemValid, type QuoteItemInput, type Tarifas } from "@/lib/pricing";
 import { createQuote, updateQuote } from "@/app/actions/quotes";
 import ItemCard from "./ItemCard";
 import { blankItemState, type QuoteFormState } from "./types";
@@ -16,10 +16,14 @@ export default function QuoteForm({
   mode,
   quoteId,
   initial,
+  isAdmin,
+  tarifas,
 }: {
   mode: "new" | "edit";
   quoteId?: string;
   initial: QuoteFormState;
+  isAdmin: boolean;
+  tarifas: Tarifas;
 }) {
   const router = useRouter();
   const [form, setForm] = useState<QuoteFormState>(initial);
@@ -42,8 +46,8 @@ export default function QuoteForm({
     [form.items]
   );
   const { lineas, total, abono } = useMemo(
-    () => computeQuoteTotals(itemInputs, form.direccion),
-    [itemInputs, form.direccion]
+    () => computeQuoteTotals(itemInputs, form.direccion, tarifas),
+    [itemInputs, form.direccion, tarifas]
   );
 
   const cannotSave =
@@ -89,6 +93,7 @@ export default function QuoteForm({
             key={idx}
             item={it}
             direccion={form.direccion}
+            tarifas={tarifas}
             removeDisabled={form.items.length <= 1}
             onChange={(patch) => patchItem(idx, patch)}
             onRemove={() => {
@@ -132,6 +137,23 @@ export default function QuoteForm({
             />
           </div>
           <div>
+            <label className={lblStyle}>RUT del cliente</label>
+            <input
+              value={form.clienteRut}
+              onChange={(e) => patchForm({ clienteRut: e.target.value })}
+              placeholder="Ej: 12.345.678-9"
+              className={inputStyle}
+            />
+            <label className="flex items-center gap-1.5 text-xs text-[#64748b] mt-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.mostrarRut}
+                onChange={(e) => patchForm({ mostrarRut: e.target.checked })}
+              />
+              Incluir el RUT en la cotización
+            </label>
+          </div>
+          <div>
             <label className={lblStyle}>Correo</label>
             <input
               value={form.correo}
@@ -145,8 +167,17 @@ export default function QuoteForm({
             <input
               value={form.numero}
               onChange={(e) => patchForm({ numero: e.target.value })}
-              className={inputStyle}
+              disabled={!isAdmin}
+              readOnly={!isAdmin}
+              className={
+                isAdmin ? inputStyle : `${inputStyle} bg-[#f1f5f9] text-[#64748b] cursor-not-allowed`
+              }
             />
+            {!isAdmin && (
+              <div className="text-xs text-[#94a3b8] mt-1">
+                Se asigna automáticamente. Solo un administrador puede cambiarlo.
+              </div>
+            )}
           </div>
           <div>
             <label className={lblStyle}>Fecha de emisión</label>

@@ -41,7 +41,8 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
         </div>
 
         <p className="text-sm leading-[1.7] text-[#334155]">
-          Estimado/a <b>{vm.cliente}</b>,
+          Estimado/a <b>{vm.cliente}</b>
+          {vm.mostrarRut && vm.clienteRut ? ` (RUT ${vm.clienteRut})` : ""},
         </p>
         <p className="text-sm leading-[1.7] text-[#334155]">
           Junto con saludarle, adjunto la cotización formal para {vm.intro}. Los detalles, así como
@@ -133,6 +134,24 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
             <li>
               Lugar: Av. Los Carrera 01948, sector Paso Hondo, paradero 32, Quilpué. (Fono: +56 9 7519
               4982).
+              <br />
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Av.+Los+Carrera+01948+Quilpu%C3%A9+Chile"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#1f6fb8] font-semibold"
+              >
+                Ver en Google Maps
+              </a>
+              {" · "}
+              <a
+                href="https://waze.com/ul?q=Av.%20Los%20Carrera%2001948%20Quilpu%C3%A9%20Chile&navigate=yes"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#1f6fb8] font-semibold"
+              >
+                Ver en Waze
+              </a>
             </li>
             <li>
               {vm.plazoRecepcionLabel}: {vm.plazoRecepcion}.
@@ -174,7 +193,7 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
           <br />
           <b className="text-[#0e2a43]">{vm.vendedor}</b>
           <br />
-          Naviera GV S.A. · +56 32 239 1749
+          Naviera GV S.A. · +56 9 7512 4982
         </div>
       </div>
     </div>

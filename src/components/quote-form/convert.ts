@@ -6,6 +6,8 @@ export function dbToFormState(quote: QuoteWithRelations): QuoteFormState {
   return {
     direccion: quote.direccion as "ida" | "vuelta",
     cliente: quote.cliente,
+    clienteRut: quote.clienteRut,
+    mostrarRut: quote.mostrarRut,
     correo: quote.correo,
     numero: String(quote.numero),
     fecha: quote.fecha.toISOString().slice(0, 10),
@@ -56,6 +58,8 @@ export function formStateToPayload(form: QuoteFormState) {
   return {
     direccion: form.direccion,
     cliente: form.cliente,
+    clienteRut: form.clienteRut,
+    mostrarRut: form.mostrarRut,
     correo: form.correo,
     numero: Number(form.numero) || 0,
     fecha: form.fecha,

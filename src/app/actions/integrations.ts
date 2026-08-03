@@ -10,30 +10,11 @@ export async function getIntegrationStatus() {
   return { dropbox: isDropboxConfigured(), gmail: isGmailConfigured() };
 }
 
-async function requireSessionAndQuote(quoteId: string) {
-  const session = await auth();
-  if (!session?.user) throw new Error("No autenticado.");
-
-  const quote = await prisma.quote.findUnique({ where: { id: quoteId } });
-  if (!quote) throw new Error("Cotización no encontrada.");
-
-  return { session, quote };
-}
-
-export async function exportQuoteToDropbox(quoteId: string): Promise<{ path: string }> {
-  const { quote } = await requireSessionAndQuote(quoteId);
-  const pdf = await renderQuotePdf(quoteId);
-  return uploadQuotePdf(quote, pdf);
-}
-
 /**
- * Best-effort background export used right after a quote is saved (see
- * quotes.ts, scheduled via next/server's `after`). Never throws — a failed
- * or unconfigured Dropbox export must not block saving a quote.
- *
- * Opt-in: only runs when DROPBOX_AUTO_EXPORT=1. Otherwise employees export
- * on demand with the "Guardar en Dropbox" button, so saves never silently
- * write to the shared team folder.
+ * Automatic export run right after every quote is created or updated (see
+ * quotes.ts, scheduled via next/server's `after`) — no button, no prompt.
+ * Never throws — a failed or unconfigured Dropbox export must not block
+ * saving a quote. Gated behind DROPBOX_AUTO_EXPORT=1 as a kill switch.
  */
 export async function autoExportQuoteToDropbox(quoteId: string): Promise<void> {
   if (process.env.DROPBOX_AUTO_EXPORT !== "1") return;
@@ -48,18 +29,21 @@ export async function autoExportQuoteToDropbox(quoteId: string): Promise<void> {
   }
 }
 
-export async function sendQuoteByEmail(
-  quoteId: string,
-  opts: { ccMe?: boolean } = {}
-): Promise<void> {
-  const { session, quote } = await requireSessionAndQuote(quoteId);
+export async function sendQuoteByEmail(quoteId: string): Promise<void> {
+  const session = await auth();
+  if (!session?.user) throw new Error("No autenticado.");
+
+  const quote = await prisma.quote.findUnique({
+    where: { id: quoteId },
+    include: { createdBy: true },
+  });
+  if (!quote) throw new Error("Cotización no encontrada.");
+
   const pdf = await renderQuotePdf(quoteId);
 
-  let cc: string | undefined;
-  if (opts.ccMe) {
-    const me = await prisma.user.findUnique({ where: { id: session.user.id } });
-    cc = me?.email || undefined;
-  }
+  // Always cc whoever created the quote, so they keep a record of what was
+  // sent — no opt-in checkbox needed.
+  const cc = quote.createdBy?.email || undefined;
 
   await sendQuoteEmail({
     to: quote.correo,

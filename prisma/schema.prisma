@@ -62,6 +62,9 @@ model Quote {
 
   direccion      Direccion @default(ida)
   cliente        String
+  clienteRut     String    @default("")
+  // Whether clienteRut should be printed on the formal document.
+  mostrarRut     Boolean   @default(false)
   correo         String
   fecha          DateTime
   vigenciaDias   Int       @default(7)
@@ -127,4 +130,38 @@ model Vehiculo {
   alto        Float
 
   @@index([quoteItemId])
+}
+
+// Singleton row (id "default") holding every configurable price used by the
+// pricing engine (see lib/tarifas.ts, lib/pricing.ts). Admin-editable via
+// /tarifas. Existing quotes are unaffected when these change — their
+// lineas/total/abono are a frozen snapshot (see Quote model comment above).
+model Tarifa {
+  id String @id @default("default")
+
+  // Transporte marítimo, $ por m³.
+  maritimoIdaVehiculo Int @default(255800)
+  maritimoIdaOtros    Int @default(240800)
+  maritimoVuelta      Int @default(132800)
+
+  // Vehículos: grúa de traslado, $ por vehículo.
+  gruaVehiculo Int @default(95000)
+
+  // Cajones: fabricación (por cajón, distinto por tamaño) + accesorios (por
+  // cajón, iguales para los tres tamaños). Zunchos/Tapas parten en 0 — no
+  // aparecen en la cotización hasta que un administrador les asigne un valor.
+  fabricacionCajon266 Int @default(84000)
+  fabricacionCajon173 Int @default(66000)
+  fabricacionCajon231 Int @default(84000)
+  fundaProteccion     Int @default(21000)
+  zunchos             Int @default(0)
+  tapas               Int @default(0)
+
+  // Cajones y contenedor: consolidación, $ por m³.
+  consolidacionPorM3 Int @default(11000)
+
+  // Contenedor 10 pies: arriendo, $ por contenedor.
+  arriendoContenedor10 Int @default(45000)
+
+  updatedAt DateTime @updatedAt
 }

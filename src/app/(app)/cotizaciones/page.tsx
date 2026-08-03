@@ -1,11 +1,25 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 import { fmtCLP, fmtDate, DIRECCION_LABEL, type Direccion } from "@/lib/pricing";
 import { tipoLabelForQuote } from "@/lib/quote-view";
 import FilterBar from "@/components/FilterBar";
 import EstadoSelect from "@/components/EstadoSelect";
 import DeleteQuoteButton from "@/components/DeleteQuoteButton";
 import type { Prisma } from "@prisma/client";
+
+// Case- and accent-insensitive: "José", "jose", "JOSÉ" all match "jose".
+// Strips combining diacritical marks (U+0300-U+036F) left behind by NFD
+// decomposition, by code point rather than a regex range literal.
+function normalize(s: string): string {
+  return Array.from(s.normalize("NFD"))
+    .filter((ch) => {
+      const code = ch.codePointAt(0) ?? 0;
+      return code < 0x300 || code > 0x36f;
+    })
+    .join("")
+    .toLowerCase();
+}
 
 export default async function CotizacionesPage({
   searchParams,
@@ -17,21 +31,28 @@ export default async function CotizacionesPage({
   const estado = params.estado || "todas";
   const direccion = params.direccion || "todas";
 
-  const where: Prisma.QuoteWhereInput = {};
-  if (estado !== "todas") where.estado = estado as Prisma.QuoteWhereInput["estado"];
-  if (direccion !== "todas") where.direccion = direccion as Prisma.QuoteWhereInput["direccion"];
-  if (cliente) {
-    where.OR = [
-      { cliente: { contains: cliente } },
-      { numero: Number.isFinite(Number(cliente)) ? Number(cliente) : -1 },
-    ];
-  }
+  const [session, where] = await Promise.all([
+    auth(),
+    Promise.resolve<Prisma.QuoteWhereInput>({
+      ...(estado !== "todas" ? { estado: estado as Prisma.QuoteWhereInput["estado"] } : {}),
+      ...(direccion !== "todas" ? { direccion: direccion as Prisma.QuoteWhereInput["direccion"] } : {}),
+    }),
+  ]);
+  const isAdmin = session?.user?.role === "ADMIN";
 
-  const quotes = await prisma.quote.findMany({
+  let quotes = await prisma.quote.findMany({
     where,
     include: { items: { include: { vehiculos: true } } },
     orderBy: { numero: "desc" },
   });
+
+  if (cliente) {
+    const needle = normalize(cliente);
+    const asNumero = Number.isFinite(Number(cliente)) ? Number(cliente) : null;
+    quotes = quotes.filter(
+      (q) => normalize(q.cliente).includes(needle) || (asNumero !== null && q.numero === asNumero)
+    );
+  }
 
   return (
     <div className="flex-1 px-7 py-8 max-w-[1280px] w-full mx-auto">
@@ -112,7 +133,7 @@ export default async function CotizacionesPage({
                     >
                       Descargar
                     </a>
-                    <DeleteQuoteButton id={q.id} numero={q.numero} />
+                    {isAdmin && <DeleteQuoteButton id={q.id} numero={q.numero} />}
                   </td>
                 </tr>
               ))}
