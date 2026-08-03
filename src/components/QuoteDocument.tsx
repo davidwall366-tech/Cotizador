@@ -136,20 +136,39 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
               4982).
               <br />
               <a
-                href="https://www.google.com/maps/search/?api=1&query=Av.+Los+Carrera+01948+Quilpu%C3%A9+Chile"
+                href="https://www.google.com/maps/search/?api=1&query=Naviera+GV"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#1f6fb8] font-semibold"
+                className="text-[#1f6fb8] font-semibold inline-flex items-center gap-1"
               >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M12 2C7.86 2 4.5 5.36 4.5 9.5c0 5.5 7.5 12.5 7.5 12.5s7.5-7 7.5-12.5C19.5 5.36 16.14 2 12 2z"
+                    fill="#EA4335"
+                  />
+                  <circle cx="12" cy="9.5" r="2.75" fill="#ffffff" />
+                </svg>
                 Ver en Google Maps
               </a>
               {" · "}
               <a
-                href="https://waze.com/ul?q=Av.%20Los%20Carrera%2001948%20Quilpu%C3%A9%20Chile&navigate=yes"
+                href="https://waze.com/ul?q=Naviera%20GV&navigate=yes"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#1f6fb8] font-semibold"
+                className="text-[#1f6fb8] font-semibold inline-flex items-center gap-1"
               >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" fill="#33CCFF" />
+                  <circle cx="8.7" cy="10.5" r="1.3" fill="#0e2a43" />
+                  <circle cx="15.3" cy="10.5" r="1.3" fill="#0e2a43" />
+                  <path
+                    d="M7.5 14.5c1 1.3 2.6 2 4.5 2s3.5-.7 4.5-2"
+                    stroke="#0e2a43"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                </svg>
                 Ver en Waze
               </a>
             </li>
