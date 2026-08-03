@@ -394,6 +394,9 @@ export function condicionesForTipos(tiposPresentes: TipoItem[], vigenciaDias: nu
   lines.push(
     "Si su carga se recibe sin embalaje, se procederá a embalarla con el costo respectivo para el cliente. En caso de que se entregue ya embalada, la empresa se reserva el derecho de reembalarla si considera que la protección actual es insuficiente para el transporte marítimo, cobrando el costo adicional que esto implique."
   );
+  lines.push(
+    "En caso de entregar su carga embalada, el cliente se hace responsable del embalaje. Esta naviera no responderá por daños a la mercancía."
+  );
   if (tiposPresentes.includes("contenedor10")) {
     lines.push(
       "Alcance del servicio: operamos exclusivamente el tramo marítimo hasta el puerto de destino; no realizamos retiros a domicilio ni entregas finales. El cliente debe retirar la carga y devolver el contenedor vacío el mismo día de la descarga."
