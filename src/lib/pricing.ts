@@ -103,6 +103,7 @@ export interface Tarifas {
   fundaProteccion: number;
   zunchos: number;
   tapas: number;
+  nylon: number;
   consolidacionPorM3: number;
   arriendoContenedor10: number;
 }
@@ -120,6 +121,7 @@ export const DEFAULT_TARIFAS: Tarifas = {
   fundaProteccion: 21000,
   zunchos: 0,
   tapas: 0,
+  nylon: 0,
   consolidacionPorM3: 11000,
   arriendoContenedor10: 45000,
 };
@@ -234,6 +236,7 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
       lineas.push({ label: `Funda de Protección × ${qty}`, value: tarifas.fundaProteccion * qty });
       if (tarifas.zunchos > 0) lineas.push({ label: `Zunchos × ${qty}`, value: tarifas.zunchos * qty });
       if (tarifas.tapas > 0) lineas.push({ label: `Tapas × ${qty}`, value: tarifas.tapas * qty });
+      if (tarifas.nylon > 0) lineas.push({ label: `Nylon × ${qty}`, value: tarifas.nylon * qty });
       lineas.push({
         label: `Consolidación (2,66 m³ × ${fmtRate(tarifas.consolidacionPorM3)}/m³) × ${qty}`,
         value: Math.round(2.66 * tarifas.consolidacionPorM3) * qty,
@@ -250,6 +253,7 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
       lineas.push({ label: `Funda de Protección × ${qty}`, value: tarifas.fundaProteccion * qty });
       if (tarifas.zunchos > 0) lineas.push({ label: `Zunchos × ${qty}`, value: tarifas.zunchos * qty });
       if (tarifas.tapas > 0) lineas.push({ label: `Tapas × ${qty}`, value: tarifas.tapas * qty });
+      if (tarifas.nylon > 0) lineas.push({ label: `Nylon × ${qty}`, value: tarifas.nylon * qty });
       lineas.push({
         label: `Consolidación (1,73 m³ × ${fmtRate(tarifas.consolidacionPorM3)}/m³) × ${qty}`,
         value: Math.round(1.73 * tarifas.consolidacionPorM3) * qty,
@@ -266,6 +270,7 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
       lineas.push({ label: `Funda de Protección × ${qty}`, value: tarifas.fundaProteccion * qty });
       if (tarifas.zunchos > 0) lineas.push({ label: `Zunchos × ${qty}`, value: tarifas.zunchos * qty });
       if (tarifas.tapas > 0) lineas.push({ label: `Tapas × ${qty}`, value: tarifas.tapas * qty });
+      if (tarifas.nylon > 0) lineas.push({ label: `Nylon × ${qty}`, value: tarifas.nylon * qty });
       lineas.push({
         label: `Consolidación (2,31 m³ × ${fmtRate(tarifas.consolidacionPorM3)}/m³) × ${qty}`,
         value: Math.round(2.31 * tarifas.consolidacionPorM3) * qty,

@@ -37,11 +37,12 @@ const GRUPOS: { titulo: string; nota?: string; campos: FieldDef[] }[] = [
   },
   {
     titulo: "Cajones — Accesorios (todas las medidas)",
-    nota: "Zunchos y Tapas solo aparecen en la cotización si su valor es mayor a $0.",
+    nota: "Zunchos, Tapas y Nylon solo aparecen en la cotización si su valor es mayor a $0.",
     campos: [
       { key: "fundaProteccion", label: "Funda de protección", suffix: "$ / cajón" },
       { key: "zunchos", label: "Zunchos", suffix: "$ / cajón" },
       { key: "tapas", label: "Tapas", suffix: "$ / cajón" },
+      { key: "nylon", label: "Nylon", suffix: "$ / cajón" },
     ],
   },
   {

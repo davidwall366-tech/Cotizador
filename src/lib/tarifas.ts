@@ -23,6 +23,7 @@ export async function getTarifas(): Promise<Tarifas> {
     fundaProteccion: row.fundaProteccion,
     zunchos: row.zunchos,
     tapas: row.tapas,
+    nylon: row.nylon,
     consolidacionPorM3: row.consolidacionPorM3,
     arriendoContenedor10: row.arriendoContenedor10,
   };

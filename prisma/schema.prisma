@@ -148,14 +148,15 @@ model Tarifa {
   gruaVehiculo Int @default(95000)
 
   // Cajones: fabricación (por cajón, distinto por tamaño) + accesorios (por
-  // cajón, iguales para los tres tamaños). Zunchos/Tapas parten en 0 — no
-  // aparecen en la cotización hasta que un administrador les asigne un valor.
+  // cajón, iguales para los tres tamaños). Zunchos/Tapas/Nylon parten en 0 —
+  // no aparecen en la cotización hasta que un administrador les asigne valor.
   fabricacionCajon266 Int @default(84000)
   fabricacionCajon173 Int @default(66000)
   fabricacionCajon231 Int @default(84000)
   fundaProteccion     Int @default(21000)
   zunchos             Int @default(0)
   tapas               Int @default(0)
+  nylon               Int @default(0)
 
   // Cajones y contenedor: consolidación, $ por m³.
   consolidacionPorM3 Int @default(11000)
