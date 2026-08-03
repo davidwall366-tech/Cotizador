@@ -206,7 +206,7 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
               <li>
                 {vm.plazoRecepcionLabel}: {vm.plazoRecepcion}.
               </li>
-              <li>Horarios: De lunes a jueves de 8:45 a 12:30 hrs y viernes de 8:45 a 12:30 hrs.</li>
+              <li>Horarios: Lunes a jueves de 8:45 a 12:30 hrs. Viernes de 8:45 a 12:30 hrs.</li>
               <li>
                 Confirmación: es obligatorio confirmar antes de despachar. Los itinerarios pueden sufrir
                 variaciones por clima. Puede revisar las fechas actualizadas en navieragv.com.
