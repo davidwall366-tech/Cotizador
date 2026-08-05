@@ -52,6 +52,11 @@ const GRUPOS: { titulo: string; nota?: string; campos: FieldDef[] }[] = [
       { key: "arriendoContenedor10", label: "Arriendo de contenedor 10 pies", suffix: "$ / contenedor" },
     ],
   },
+  {
+    titulo: "Seguro de carga",
+    nota: "Se aplica al volumen de cada ítem (vehículos, carga general, cajones y contenedor). Solo aparece en la cotización si su valor es mayor a $0.",
+    campos: [{ key: "seguroCargaPorM3", label: "Seguro de carga", suffix: "$ / m³" }],
+  },
 ];
 
 export default function TarifasForm({ initial }: { initial: Tarifas }) {

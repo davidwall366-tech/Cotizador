@@ -26,6 +26,7 @@ export async function getTarifas(): Promise<Tarifas> {
     nylon: row.nylon,
     consolidacionPorM3: row.consolidacionPorM3,
     arriendoContenedor10: row.arriendoContenedor10,
+    seguroCargaPorM3: row.seguroCargaPorM3,
   };
 }
 

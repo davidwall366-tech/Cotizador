@@ -169,5 +169,9 @@ model Tarifa {
   // Contenedor 10 pies: arriendo, $ por contenedor.
   arriendoContenedor10 Int @default(45000)
 
+  // Seguro de carga, $ por m³, aplicado al volumen de cada ítem. Parte en 0
+  // — no aparece en la cotización hasta que un administrador le asigne valor.
+  seguroCargaPorM3 Int @default(0)
+
   updatedAt DateTime @updatedAt
 }

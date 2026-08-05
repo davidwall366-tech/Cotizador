@@ -116,6 +116,7 @@ export interface Tarifas {
   nylon: number;
   consolidacionPorM3: number;
   arriendoContenedor10: number;
+  seguroCargaPorM3: number;
 }
 
 // Used wherever a caller hasn't loaded the current rates from the database
@@ -134,6 +135,7 @@ export const DEFAULT_TARIFAS: Tarifas = {
   nylon: 0,
   consolidacionPorM3: 11000,
   arriendoContenedor10: 45000,
+  seguroCargaPorM3: 0,
 };
 
 export const TIPO_ORDER: TipoItem[] = [
@@ -226,6 +228,12 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
         ? `Camión Grúa - traslado a bodega de acopio en Quilpué (${count} vehículo${count === 1 ? "" : "s"} × ${fmtRate(tarifas.gruaVehiculo)})`
         : `Camión Grúa - traslado a puerto (${count} vehículo${count === 1 ? "" : "s"} × ${fmtRate(tarifas.gruaVehiculo)})`;
     lineas.push({ label: gruaLabel, value: count * tarifas.gruaVehiculo });
+    if (tarifas.seguroCargaPorM3 > 0) {
+      lineas.push({
+        label: `Seguro de Carga (${m3r} m³ × ${fmtRate(tarifas.seguroCargaPorM3)}/m³)`,
+        value: Math.round(m3r * tarifas.seguroCargaPorM3),
+      });
+    }
   } else if (tipo === "carga_general") {
     const m3 = Number(item.cargaM3) || 0;
     const desc = (item.cargaDesc || "").trim();
@@ -238,6 +246,12 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
     const embalajeCosto = Number(item.embalajeCosto) || 0;
     if (embalajeCosto > 0) {
       lineas.push({ label: "Embalaje (costo aproximado)", value: Math.round(embalajeCosto) });
+    }
+    if (tarifas.seguroCargaPorM3 > 0) {
+      lineas.push({
+        label: `Seguro de Carga (${m3} m³ × ${fmtRate(tarifas.seguroCargaPorM3)}/m³)`,
+        value: Math.round(m3 * tarifas.seguroCargaPorM3),
+      });
     }
   } else if (tipo === "cajon266") {
     const qty = Number(item.cajonCantidad) || 0;
@@ -256,6 +270,12 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
       label: `Transporte Marítimo (2,66 m³ × ${fmtRate(rate)}/m³) × ${qty}`,
       value: Math.round(2.66 * rate) * qty,
     });
+    if (tarifas.seguroCargaPorM3 > 0) {
+      lineas.push({
+        label: `Seguro de Carga (2,66 m³ × ${fmtRate(tarifas.seguroCargaPorM3)}/m³) × ${qty}`,
+        value: Math.round(2.66 * tarifas.seguroCargaPorM3) * qty,
+      });
+    }
   } else if (tipo === "cajon173") {
     const qty = Number(item.cajonCantidad) || 0;
     if (direccion !== "vuelta") {
@@ -273,6 +293,12 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
       label: `Transporte Marítimo (1,73 m³ × ${fmtRate(rate)}/m³) × ${qty}`,
       value: Math.round(1.73 * rate) * qty,
     });
+    if (tarifas.seguroCargaPorM3 > 0) {
+      lineas.push({
+        label: `Seguro de Carga (1,73 m³ × ${fmtRate(tarifas.seguroCargaPorM3)}/m³) × ${qty}`,
+        value: Math.round(1.73 * tarifas.seguroCargaPorM3) * qty,
+      });
+    }
   } else if (tipo === "cajon231") {
     const qty = Number(item.cajonCantidad) || 0;
     if (direccion !== "vuelta") {
@@ -290,6 +316,12 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
       label: `Transporte Marítimo (2,31 m³ × ${fmtRate(rate)}/m³) × ${qty}`,
       value: Math.round(2.31 * rate) * qty,
     });
+    if (tarifas.seguroCargaPorM3 > 0) {
+      lineas.push({
+        label: `Seguro de Carga (2,31 m³ × ${fmtRate(tarifas.seguroCargaPorM3)}/m³) × ${qty}`,
+        value: Math.round(2.31 * tarifas.seguroCargaPorM3) * qty,
+      });
+    }
   } else if (tipo === "contenedor10") {
     const qty = Number(item.cajonCantidad) || 0;
     const m3 = 21.3;
@@ -305,6 +337,12 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
       label: `Transporte Marítimo Contenedor 10 pies (${m3Str} m³ × ${fmtRate(rate)}/m³) × ${qty}`,
       value: Math.round(m3 * rate) * qty,
     });
+    if (tarifas.seguroCargaPorM3 > 0) {
+      lineas.push({
+        label: `Seguro de Carga (${m3Str} m³ × ${fmtRate(tarifas.seguroCargaPorM3)}/m³) × ${qty}`,
+        value: Math.round(m3 * tarifas.seguroCargaPorM3) * qty,
+      });
+    }
   }
 
   return lineas;
