@@ -40,7 +40,7 @@ export async function sendQuoteEmail(input: SendQuoteEmailInput): Promise<void> 
       `Junto con saludarle, adjunto la cotización N° ${input.numero} solicitada.\n\n` +
       `Quedamos atentos a sus comentarios.\n\n` +
       `Atentamente,\n${input.vendedor}\n` +
-      `Naviera GV S.A. · +56 9 7512 4982`,
+      `Naviera GV S.A. · +56 9 7519 4982`,
     attachments: [
       {
         filename: `cotizacion-${input.numero}.pdf`,

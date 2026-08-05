@@ -248,7 +248,7 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
           <br />
           <b className="text-[#0e2a43]">{vm.vendedor}</b>
           <br />
-          Naviera GV S.A. · +56 9 7512 4982
+          Naviera GV S.A. · +56 9 7519 4982
         </div>
       </div>
     </div>
