@@ -83,7 +83,7 @@ export default function ItemCard({
       {isVehiculo && (
         <>
           <div className="text-xs text-[#94a3b8] mb-2.5">
-            Ingresa largo, ancho y alto en metros por cada vehículo.
+            Ingresa largo, alto y ancho en metros por cada vehículo.
           </div>
           {item.vehiculos.map((v, i) => {
             const l = Number(v.largo) || 0;
@@ -112,21 +112,6 @@ export default function ItemCard({
                   />
                 </div>
                 <div>
-                  <label className={lblSmall}>Ancho (m)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    value={v.ancho}
-                    onChange={(e) => {
-                      const arr = item.vehiculos.slice();
-                      arr[i] = { ...arr[i], ancho: e.target.value };
-                      onChange({ vehiculos: arr });
-                    }}
-                    className={inputStyle}
-                  />
-                </div>
-                <div>
                   <label className={lblSmall}>Alto (m)</label>
                   <input
                     type="number"
@@ -136,6 +121,21 @@ export default function ItemCard({
                     onChange={(e) => {
                       const arr = item.vehiculos.slice();
                       arr[i] = { ...arr[i], alto: e.target.value };
+                      onChange({ vehiculos: arr });
+                    }}
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className={lblSmall}>Ancho (m)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={v.ancho}
+                    onChange={(e) => {
+                      const arr = item.vehiculos.slice();
+                      arr[i] = { ...arr[i], ancho: e.target.value };
                       onChange({ vehiculos: arr });
                     }}
                     className={inputStyle}
