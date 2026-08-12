@@ -4,7 +4,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { renderQuotePdf } from "@/lib/pdf";
 import { isDropboxConfigured, uploadQuotePdf } from "@/lib/dropbox";
-import { isGmailConfigured, sendQuoteEmail } from "@/lib/gmail";
+import { isGmailConfigured, sendApprovalEmail, sendClosedEmail, sendQuoteEmail } from "@/lib/gmail";
+import { ccAdminsAndCreator } from "@/lib/notify-cc";
 
 export async function getIntegrationStatus() {
   return { dropbox: isDropboxConfigured(), gmail: isGmailConfigured() };
@@ -43,16 +44,7 @@ export async function sendQuoteByEmail(quoteId: string): Promise<void> {
 
   // Always cc whoever created the quote (so they keep a record of what was
   // sent) and every active administrator — no opt-in checkbox needed.
-  const admins = await prisma.user.findMany({
-    where: { role: "ADMIN", active: true, email: { not: null } },
-  });
-  const cc = Array.from(
-    new Set(
-      [quote.createdBy?.email, ...admins.map((a) => a.email)].filter(
-        (e): e is string => Boolean(e) && e !== quote.correo
-      )
-    )
-  );
+  const cc = await ccAdminsAndCreator(quote);
 
   await sendQuoteEmail({
     to: quote.correo,
@@ -62,4 +54,41 @@ export async function sendQuoteByEmail(quoteId: string): Promise<void> {
     vendedor: quote.vendedor || "Naviera GV",
     pdf,
   });
+}
+
+/**
+ * Automatic notification run right after a quote's estado changes to
+ * "aprobada" or "rechazada" (see quotes.ts, scheduled via next/server's
+ * `after`) — no button, no prompt. Never throws — a failed or unconfigured
+ * Gmail must not block the estado change itself.
+ */
+export async function notifyEstadoChange(
+  quoteId: string,
+  estado: "aprobada" | "rechazada"
+): Promise<void> {
+  if (!isGmailConfigured()) return;
+  try {
+    const quote = await prisma.quote.findUnique({
+      where: { id: quoteId },
+      include: { createdBy: true },
+    });
+    if (!quote) return;
+
+    const cc = await ccAdminsAndCreator(quote);
+    const input = {
+      to: quote.correo,
+      cc,
+      numero: quote.numero,
+      cliente: quote.cliente,
+      vendedor: quote.vendedor || "Naviera GV",
+    };
+
+    if (estado === "aprobada") {
+      await sendApprovalEmail(input);
+    } else {
+      await sendClosedEmail(input);
+    }
+  } catch (err) {
+    console.error("[gmail] estado-change notify failed for quote", quoteId, err);
+  }
 }

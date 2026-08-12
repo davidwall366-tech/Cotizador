@@ -51,6 +51,57 @@ export async function sendQuoteEmail(input: SendQuoteEmailInput): Promise<void> 
   });
 }
 
+export interface SendEstadoChangeEmailInput {
+  to: string;
+  cc?: string[];
+  numero: number;
+  cliente: string;
+  vendedor: string;
+}
+
+/** Sent automatically when a quote's estado changes to "aprobada". */
+export async function sendApprovalEmail(input: SendEstadoChangeEmailInput): Promise<void> {
+  if (!isGmailConfigured()) {
+    throw new Error("Gmail no está configurado (faltan GMAIL_USER / GMAIL_APP_PASSWORD).");
+  }
+
+  const transport = getTransport();
+  await transport.sendMail({
+    from: `"Naviera GV" <${process.env.GMAIL_USER}>`,
+    to: input.to,
+    cc: input.cc?.length ? input.cc : undefined,
+    subject: `Cotización N° ${input.numero} — Reserva confirmada`,
+    text:
+      `Estimado/a ${input.cliente},\n\n` +
+      `Le confirmamos que hemos recibido el abono de reserva correspondiente a la cotización N° ${input.numero}, ` +
+      `por lo que su reserva ha quedado ingresada exitosamente en nuestro sistema.\n\n` +
+      `Quedamos atentos a cualquier consulta adicional respecto a su envío.\n\n` +
+      `Atentamente,\n${input.vendedor}\n` +
+      `Naviera GV S.A. · +56 9 7519 4982`,
+  });
+}
+
+/** Sent automatically when a quote's estado changes to "rechazada". */
+export async function sendClosedEmail(input: SendEstadoChangeEmailInput): Promise<void> {
+  if (!isGmailConfigured()) {
+    throw new Error("Gmail no está configurado (faltan GMAIL_USER / GMAIL_APP_PASSWORD).");
+  }
+
+  const transport = getTransport();
+  await transport.sendMail({
+    from: `"Naviera GV" <${process.env.GMAIL_USER}>`,
+    to: input.to,
+    cc: input.cc?.length ? input.cc : undefined,
+    subject: `Cotización N° ${input.numero} — Estado actualizado`,
+    text:
+      `Estimado/a ${input.cliente},\n\n` +
+      `Le informamos que la cotización N° ${input.numero} ha sido cerrada en nuestro sistema. ` +
+      `Si en el futuro necesita cotizar un nuevo envío, con gusto le ayudaremos.\n\n` +
+      `Atentamente,\n${input.vendedor}\n` +
+      `Naviera GV S.A. · +56 9 7519 4982`,
+  });
+}
+
 export interface SendExpirationAlertInput {
   to: string;
   cc?: string[];

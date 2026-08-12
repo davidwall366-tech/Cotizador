@@ -8,7 +8,7 @@ import { requireAdminForAction } from "@/lib/admin-guard";
 import { computeQuoteTotals, itemValid, type QuoteItemInput } from "@/lib/pricing";
 import { getTarifas } from "@/lib/tarifas";
 import { quoteFormSchema, type QuoteFormInput } from "@/lib/quote-schema";
-import { autoExportQuoteToDropbox } from "@/app/actions/integrations";
+import { autoExportQuoteToDropbox, notifyEstadoChange } from "@/app/actions/integrations";
 
 export async function getNextNumero(): Promise<number> {
   const last = await prisma.quote.findFirst({ orderBy: { numero: "desc" } });
@@ -169,6 +169,9 @@ export async function setEstado(id: string, estado: "pendiente" | "aprobada" | "
   const session = await auth();
   if (!session?.user) throw new Error("No autenticado.");
 
+  const existing = await prisma.quote.findUnique({ where: { id }, select: { estado: true } });
+  if (!existing) throw new Error("Cotización no encontrada.");
+
   await prisma.quote.update({
     where: { id },
     data: {
@@ -180,6 +183,12 @@ export async function setEstado(id: string, estado: "pendiente" | "aprobada" | "
   });
   revalidatePath("/cotizaciones");
   revalidatePath(`/cotizaciones/${id}`);
+
+  // Notify the client only on an actual transition into aprobada/rechazada —
+  // not when re-saving a quote that's already in that estado.
+  if (estado !== existing.estado && (estado === "aprobada" || estado === "rechazada")) {
+    after(() => notifyEstadoChange(id, estado));
+  }
 }
 
 export async function deleteQuote(id: string) {
