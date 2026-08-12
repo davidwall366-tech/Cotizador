@@ -20,6 +20,7 @@ export async function getTarifas(): Promise<Tarifas> {
     fabricacionCajon266: row.fabricacionCajon266,
     fabricacionCajon173: row.fabricacionCajon173,
     fabricacionCajon231: row.fabricacionCajon231,
+    fabricacionCajon277: row.fabricacionCajon277,
     fundaProteccion: row.fundaProteccion,
     zunchos: row.zunchos,
     tapas: row.tapas,

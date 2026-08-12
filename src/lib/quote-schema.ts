@@ -7,7 +7,15 @@ const vehiculoSchema = z.object({
 });
 
 const itemSchema = z.object({
-  tipo: z.enum(["vehiculo", "carga_general", "cajon266", "cajon173", "cajon231", "contenedor10"]),
+  tipo: z.enum([
+    "vehiculo",
+    "carga_general",
+    "cajon266",
+    "cajon173",
+    "cajon231",
+    "cajon277",
+    "contenedor10",
+  ]),
   vehiculos: z.array(vehiculoSchema).optional(),
   cargaM3: z.coerce.number().min(0).optional(),
   cargaDesc: z.string().optional().default(""),
@@ -26,6 +34,21 @@ export const quoteFormSchema = z.object({
   clienteTelefono: z.string().optional().default(""),
   mostrarTelefono: z.boolean().optional().default(false),
   correo: z.string().email("Correo inválido"),
+  correosAdicionales: z
+    .string()
+    .optional()
+    .default("")
+    .refine(
+      (val) => {
+        const parts = val
+          .split(/[,;]/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+        return parts.every((p) => z.string().email().safeParse(p).success);
+      },
+      { message: "Uno o más correos adicionales no son válidos. Sepáralos con coma." }
+    ),
+  enviarCorreosAdicionales: z.boolean().optional().default(false),
   numero: z.coerce.number().int().positive(),
   fecha: z.string().min(1),
   vigenciaDias: z.coerce.number().int().positive().default(7),

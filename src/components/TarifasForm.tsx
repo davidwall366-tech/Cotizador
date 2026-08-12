@@ -33,6 +33,7 @@ const GRUPOS: { titulo: string; nota?: string; campos: FieldDef[] }[] = [
       { key: "fabricacionCajon266", label: "Cajón 2,66 m³", suffix: "$ / cajón" },
       { key: "fabricacionCajon173", label: "Cajón 1,73 m³", suffix: "$ / cajón" },
       { key: "fabricacionCajon231", label: "Cajón 2,31 m³", suffix: "$ / cajón" },
+      { key: "fabricacionCajon277", label: "Cajón 2,77 m³", suffix: "$ / cajón" },
     ],
   },
   {

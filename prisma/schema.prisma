@@ -50,6 +50,7 @@ enum TipoItem {
   cajon266
   cajon173
   cajon231
+  cajon277
   contenedor10
 }
 
@@ -71,6 +72,11 @@ model Quote {
   clienteTelefono  String    @default("")
   mostrarTelefono  Boolean   @default(false)
   correo           String
+  // Extra addresses (comma/semicolon-separated) the formal quote is also
+  // sent to when "Enviar por correo al cliente" is clicked — only used if
+  // enviarCorreosAdicionales is true. Never printed on the document.
+  correosAdicionales        String  @default("")
+  enviarCorreosAdicionales  Boolean @default(false)
   fecha            DateTime
   vigenciaDias     Int       @default(7)
   vendedor         String    @default("")
@@ -158,6 +164,7 @@ model Tarifa {
   fabricacionCajon266 Int @default(84000)
   fabricacionCajon173 Int @default(66000)
   fabricacionCajon231 Int @default(84000)
+  fabricacionCajon277 Int @default(84000)
   fundaProteccion     Int @default(21000)
   zunchos             Int @default(0)
   tapas               Int @default(0)

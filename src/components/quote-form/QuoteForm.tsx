@@ -207,6 +207,23 @@ export default function QuoteForm({
             />
           </div>
           <div>
+            <label className={lblStyle}>Correos adicionales</label>
+            <input
+              value={form.correosAdicionales}
+              onChange={(e) => patchForm({ correosAdicionales: e.target.value })}
+              placeholder="Ej: correo1@empresa.cl, correo2@empresa.cl"
+              className={inputStyle}
+            />
+            <label className="flex items-center gap-1.5 text-xs text-[#64748b] mt-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.enviarCorreosAdicionales}
+                onChange={(e) => patchForm({ enviarCorreosAdicionales: e.target.checked })}
+              />
+              Enviar la cotización también a estos correos
+            </label>
+          </div>
+          <div>
             <label className={lblStyle}>N° de cotización</label>
             <input
               value={form.numero}

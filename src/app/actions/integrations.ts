@@ -6,6 +6,7 @@ import { renderQuotePdf } from "@/lib/pdf";
 import { isDropboxConfigured, uploadQuotePdf } from "@/lib/dropbox";
 import { isGmailConfigured, sendApprovalEmail, sendClosedEmail, sendQuoteEmail } from "@/lib/gmail";
 import { ccAdminsAndCreator } from "@/lib/notify-cc";
+import { parseEmailList } from "@/lib/email-utils";
 
 export async function getIntegrationStatus() {
   return { dropbox: isDropboxConfigured(), gmail: isGmailConfigured() };
@@ -42,12 +43,21 @@ export async function sendQuoteByEmail(quoteId: string): Promise<void> {
 
   const pdf = await renderQuotePdf(quoteId);
 
+  // The client's own address is always first `to`; additional addresses are
+  // only appended if the "enviar también a estos correos" checkbox was set.
+  const extraTo = quote.enviarCorreosAdicionales
+    ? parseEmailList(quote.correosAdicionales).filter((e) => e !== quote.correo)
+    : [];
+  const toList = [quote.correo, ...extraTo];
+  const to = toList.join(", ");
+
   // Always cc whoever created the quote (so they keep a record of what was
-  // sent) and every active administrator — no opt-in checkbox needed.
-  const cc = await ccAdminsAndCreator(quote);
+  // sent) and every active administrator — no opt-in checkbox needed. Never
+  // cc an address that's already a `to` recipient.
+  const cc = (await ccAdminsAndCreator(quote)).filter((e) => !toList.includes(e));
 
   await sendQuoteEmail({
-    to: quote.correo,
+    to,
     cc,
     numero: quote.numero,
     cliente: quote.cliente,

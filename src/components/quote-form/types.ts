@@ -38,6 +38,8 @@ export interface QuoteFormState {
   clienteTelefono: string;
   mostrarTelefono: boolean;
   correo: string;
+  correosAdicionales: string;
+  enviarCorreosAdicionales: boolean;
   numero: string;
   fecha: string;
   vigenciaDias: string;

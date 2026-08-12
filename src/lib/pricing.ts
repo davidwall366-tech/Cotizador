@@ -13,6 +13,7 @@ export type TipoItem =
   | "cajon266"
   | "cajon173"
   | "cajon231"
+  | "cajon277"
   | "contenedor10";
 
 export type Direccion = "ida" | "vuelta";
@@ -91,6 +92,13 @@ export const TIPOS_META: Record<TipoItem, TipoMeta> = {
     intro: "el servicio de transporte consolidado en cajón de madera",
     dims: "2,20 × 1,05 × 1,00 m",
   },
+  cajon277: {
+    label: "Cajón 2,77 m³",
+    badge: "C4",
+    color: "#be123c",
+    intro: "el servicio de transporte consolidado en cajón de madera",
+    dims: "2,20 × 1,20 × 1,05 m",
+  },
   contenedor10: {
     label: "Contenedor 10 pies",
     badge: "CT",
@@ -110,6 +118,7 @@ export interface Tarifas {
   fabricacionCajon266: number;
   fabricacionCajon173: number;
   fabricacionCajon231: number;
+  fabricacionCajon277: number;
   fundaProteccion: number;
   zunchos: number;
   tapas: number;
@@ -129,6 +138,7 @@ export const DEFAULT_TARIFAS: Tarifas = {
   fabricacionCajon266: 84000,
   fabricacionCajon173: 66000,
   fabricacionCajon231: 84000,
+  fabricacionCajon277: 84000,
   fundaProteccion: 21000,
   zunchos: 0,
   tapas: 0,
@@ -144,6 +154,7 @@ export const TIPO_ORDER: TipoItem[] = [
   "cajon266",
   "cajon173",
   "cajon231",
+  "cajon277",
   "contenedor10",
 ];
 
@@ -322,6 +333,29 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
         value: Math.round(2.31 * tarifas.seguroCargaPorM3) * qty,
       });
     }
+  } else if (tipo === "cajon277") {
+    const qty = Number(item.cajonCantidad) || 0;
+    if (direccion !== "vuelta") {
+      lineas.push({ label: `Fabricación de Cajón 2,77 m³ × ${qty}`, value: tarifas.fabricacionCajon277 * qty });
+      lineas.push({ label: `Funda de Protección × ${qty}`, value: tarifas.fundaProteccion * qty });
+      if (tarifas.zunchos > 0) lineas.push({ label: `Zunchos × ${qty}`, value: tarifas.zunchos * qty });
+      if (tarifas.tapas > 0) lineas.push({ label: `Tapas × ${qty}`, value: tarifas.tapas * qty });
+      if (tarifas.nylon > 0) lineas.push({ label: `Nylon × ${qty}`, value: tarifas.nylon * qty });
+      lineas.push({
+        label: `Consolidación (2,77 m³ × ${fmtRate(tarifas.consolidacionPorM3)}/m³) × ${qty}`,
+        value: Math.round(2.77 * tarifas.consolidacionPorM3) * qty,
+      });
+    }
+    lineas.push({
+      label: `Transporte Marítimo (2,77 m³ × ${fmtRate(rate)}/m³) × ${qty}`,
+      value: Math.round(2.77 * rate) * qty,
+    });
+    if (tarifas.seguroCargaPorM3 > 0) {
+      lineas.push({
+        label: `Seguro de Carga (2,77 m³ × ${fmtRate(tarifas.seguroCargaPorM3)}/m³) × ${qty}`,
+        value: Math.round(2.77 * tarifas.seguroCargaPorM3) * qty,
+      });
+    }
   } else if (tipo === "contenedor10") {
     const qty = Number(item.cajonCantidad) || 0;
     const m3 = 21.3;
@@ -394,6 +428,8 @@ export function incluyeForTipos(tiposPresentes: TipoItem[], direccion: Direccion
     lines.push(`Confección de un cajón a la medida (Dimensiones: ${TIPOS_META.cajon173.dims}).`);
   if (tiposPresentes.includes("cajon231"))
     lines.push(`Confección de un cajón a la medida (${TIPOS_META.cajon231.dims}).`);
+  if (tiposPresentes.includes("cajon277"))
+    lines.push(`Confección de un cajón a la medida (Dimensiones: ${TIPOS_META.cajon277.dims}).`);
   if (tiposPresentes.includes("contenedor10"))
     lines.push("Arriendo de contenedor de 10 pies y maniobras de consolidación de la carga.");
   lines.push(
