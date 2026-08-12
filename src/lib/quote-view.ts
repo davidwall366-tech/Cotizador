@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { formatRut } from "@/lib/rut";
+import { parseEmailList } from "@/lib/email-utils";
 import type { Condicion, Direccion, LineaCosto, QuoteItemInput, TipoItem } from "@/lib/pricing";
 import {
   DIRECCION_LABEL,
@@ -64,6 +65,7 @@ export interface QuoteDocumentViewModel {
   clienteTelefono: string;
   mostrarTelefono: boolean;
   correo: string;
+  correosAdicionales: string[];
   intro: string;
   viajeN: string;
   direccionLabel: string;
@@ -101,6 +103,7 @@ export function buildQuoteDocumentViewModel(quote: QuoteWithRelations): QuoteDoc
     clienteTelefono: quote.clienteTelefono,
     mostrarTelefono: quote.mostrarTelefono,
     correo: quote.correo,
+    correosAdicionales: parseEmailList(quote.correosAdicionales).filter((e) => e !== quote.correo),
     intro: introForTipos(tiposPresentes),
     viajeN: quote.viajeN || "—",
     direccionLabel: DIRECCION_LABEL[direccion],

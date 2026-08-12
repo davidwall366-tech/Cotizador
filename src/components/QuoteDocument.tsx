@@ -53,6 +53,9 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
           {vm.mostrarDireccion && vm.clienteDireccion && <div>Dirección: {vm.clienteDireccion}</div>}
           {vm.mostrarTelefono && vm.clienteTelefono && <div>Teléfono: {vm.clienteTelefono}</div>}
           {vm.correo && <div>Correo: {vm.correo}</div>}
+          {vm.correosAdicionales.length > 0 && (
+            <div>Con copia a: {vm.correosAdicionales.join(", ")}</div>
+          )}
         </div>
         <p className="text-sm leading-[1.7] text-[#334155]">
           Junto con saludarle, adjunto la cotización formal para {vm.intro}. Los detalles, así como
