@@ -41,6 +41,7 @@ enum Direccion {
 enum Estado {
   pendiente
   aprobada
+  aprobada_sin_abono
   rechazada
 }
 
@@ -73,10 +74,9 @@ model Quote {
   mostrarTelefono  Boolean   @default(false)
   correo           String
   // Extra addresses (comma/semicolon-separated) the formal quote is also
-  // sent to when "Enviar por correo al cliente" is clicked — only used if
-  // enviarCorreosAdicionales is true. Never printed on the document.
-  correosAdicionales        String  @default("")
-  enviarCorreosAdicionales  Boolean @default(false)
+  // sent to when "Enviar por correo al cliente" is clicked. Never printed on
+  // the document.
+  correosAdicionales String @default("")
   fecha            DateTime
   vigenciaDias     Int       @default(7)
   vendedor         String    @default("")
@@ -125,6 +125,9 @@ model QuoteItem {
   // cajon266 / cajon173 / cajon231 / contenedor10
   cajonCantidad Int    @default(1)
   cajonDesc     String @default("")
+
+  // vehiculo — brand/model, optional.
+  vehiculoDesc String @default("")
 
   vehiculos Vehiculo[]
 

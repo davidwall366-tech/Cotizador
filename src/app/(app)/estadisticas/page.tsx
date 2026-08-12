@@ -30,7 +30,8 @@ export default async function EstadisticasPage({
   });
 
   const stats = computeEstadisticas(quotes, desde);
-  const decididas = stats.porEstado.aprobada + stats.porEstado.rechazada;
+  const decididas =
+    stats.porEstado.aprobada + stats.porEstado.aprobada_sin_abono + stats.porEstado.rechazada;
   const tasaLabel = stats.tasaAprobacion === null ? "—" : `${Math.round(stats.tasaAprobacion * 100)}%`;
 
   return (

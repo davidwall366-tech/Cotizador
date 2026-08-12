@@ -19,6 +19,7 @@ function toItemInputs(items: QuoteFormInput["items"]): QuoteItemInput[] {
   return items.map((it) => ({
     tipo: it.tipo,
     vehiculos: it.vehiculos,
+    vehiculoDesc: it.vehiculoDesc,
     cargaM3: it.cargaM3,
     cargaDesc: it.cargaDesc,
     embalajeCosto: it.embalajeCosto,
@@ -61,7 +62,6 @@ export async function createQuote(raw: QuoteFormInput): Promise<{ id: string }> 
       mostrarTelefono: input.mostrarTelefono,
       correo: input.correo,
       correosAdicionales: input.correosAdicionales,
-      enviarCorreosAdicionales: input.enviarCorreosAdicionales,
       fecha: new Date(input.fecha),
       vigenciaDias: input.vigenciaDias,
       vendedor: input.vendedor,
@@ -78,6 +78,7 @@ export async function createQuote(raw: QuoteFormInput): Promise<{ id: string }> 
         create: input.items.map((it, order) => ({
           order,
           tipo: it.tipo,
+          vehiculoDesc: it.vehiculoDesc,
           cargaM3: it.cargaM3,
           cargaDesc: it.cargaDesc,
           embalajeCosto: it.embalajeCosto,
@@ -131,7 +132,6 @@ export async function updateQuote(id: string, raw: QuoteFormInput): Promise<{ id
         mostrarTelefono: input.mostrarTelefono,
         correo: input.correo,
         correosAdicionales: input.correosAdicionales,
-        enviarCorreosAdicionales: input.enviarCorreosAdicionales,
         fecha: new Date(input.fecha),
         vigenciaDias: input.vigenciaDias,
         vendedor: input.vendedor,
@@ -149,6 +149,7 @@ export async function updateQuote(id: string, raw: QuoteFormInput): Promise<{ id
           create: input.items.map((it, order) => ({
             order,
             tipo: it.tipo,
+            vehiculoDesc: it.vehiculoDesc,
             cargaM3: it.cargaM3,
             cargaDesc: it.cargaDesc,
             embalajeCosto: it.embalajeCosto,
@@ -169,7 +170,10 @@ export async function updateQuote(id: string, raw: QuoteFormInput): Promise<{ id
   return { id };
 }
 
-export async function setEstado(id: string, estado: "pendiente" | "aprobada" | "rechazada") {
+export async function setEstado(
+  id: string,
+  estado: "pendiente" | "aprobada" | "aprobada_sin_abono" | "rechazada"
+) {
   const session = await auth();
   if (!session?.user) throw new Error("No autenticado.");
 
@@ -188,9 +192,12 @@ export async function setEstado(id: string, estado: "pendiente" | "aprobada" | "
   revalidatePath("/cotizaciones");
   revalidatePath(`/cotizaciones/${id}`);
 
-  // Notify the client only on an actual transition into aprobada/rechazada —
-  // not when re-saving a quote that's already in that estado.
-  if (estado !== existing.estado && (estado === "aprobada" || estado === "rechazada")) {
+  // Notify the client only on an actual transition into an approved/rejected
+  // estado — not when re-saving a quote that's already in that estado.
+  if (
+    estado !== existing.estado &&
+    (estado === "aprobada" || estado === "aprobada_sin_abono" || estado === "rechazada")
+  ) {
     after(() => notifyEstadoChange(id, estado));
   }
 }

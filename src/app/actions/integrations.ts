@@ -4,7 +4,13 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { renderQuotePdf } from "@/lib/pdf";
 import { isDropboxConfigured, uploadQuotePdf } from "@/lib/dropbox";
-import { isGmailConfigured, sendApprovalEmail, sendClosedEmail, sendQuoteEmail } from "@/lib/gmail";
+import {
+  isGmailConfigured,
+  sendApprovalEmail,
+  sendApprovalNoDepositEmail,
+  sendClosedEmail,
+  sendQuoteEmail,
+} from "@/lib/gmail";
 import { ccAdminsAndCreator } from "@/lib/notify-cc";
 import { parseEmailList } from "@/lib/email-utils";
 
@@ -43,11 +49,9 @@ export async function sendQuoteByEmail(quoteId: string): Promise<void> {
 
   const pdf = await renderQuotePdf(quoteId);
 
-  // The client's own address is always first `to`; additional addresses are
-  // only appended if the "enviar también a estos correos" checkbox was set.
-  const extraTo = quote.enviarCorreosAdicionales
-    ? parseEmailList(quote.correosAdicionales).filter((e) => e !== quote.correo)
-    : [];
+  // The client's own address is always first `to`; any additional addresses
+  // entered are always appended too.
+  const extraTo = parseEmailList(quote.correosAdicionales).filter((e) => e !== quote.correo);
   const toList = [quote.correo, ...extraTo];
   const to = toList.join(", ");
 
@@ -68,13 +72,13 @@ export async function sendQuoteByEmail(quoteId: string): Promise<void> {
 
 /**
  * Automatic notification run right after a quote's estado changes to
- * "aprobada" or "rechazada" (see quotes.ts, scheduled via next/server's
- * `after`) — no button, no prompt. Never throws — a failed or unconfigured
- * Gmail must not block the estado change itself.
+ * "aprobada", "aprobada_sin_abono" or "rechazada" (see quotes.ts, scheduled
+ * via next/server's `after`) — no button, no prompt. Never throws — a failed
+ * or unconfigured Gmail must not block the estado change itself.
  */
 export async function notifyEstadoChange(
   quoteId: string,
-  estado: "aprobada" | "rechazada"
+  estado: "aprobada" | "aprobada_sin_abono" | "rechazada"
 ): Promise<void> {
   if (!isGmailConfigured()) return;
   try {
@@ -95,6 +99,8 @@ export async function notifyEstadoChange(
 
     if (estado === "aprobada") {
       await sendApprovalEmail(input);
+    } else if (estado === "aprobada_sin_abono") {
+      await sendApprovalNoDepositEmail(input);
     } else {
       await sendClosedEmail(input);
     }

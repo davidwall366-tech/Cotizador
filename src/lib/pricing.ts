@@ -27,6 +27,7 @@ export interface VehiculoInput {
 export interface QuoteItemInput {
   tipo: TipoItem;
   vehiculos?: VehiculoInput[];
+  vehiculoDesc: string;
   cargaM3?: number;
   cargaDesc: string;
   embalajeCosto?: number;
@@ -184,6 +185,7 @@ export function blankItem(tipo: TipoItem = "vehiculo"): QuoteItemInput {
   return {
     tipo,
     vehiculos: [{ largo: 0, ancho: 0, alto: 0 }],
+    vehiculoDesc: "",
     cargaM3: undefined,
     cargaDesc: "",
     embalajeCosto: undefined,
@@ -230,8 +232,11 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
     const totalM3 = rows.reduce((s, v) => s + Number(v.largo) * Number(v.ancho) * Number(v.alto), 0);
     const m3r = Math.round(totalM3 * 100) / 100;
     const count = rows.length;
+    const vehiculoDesc = (item.vehiculoDesc || "").trim();
     lineas.push({
-      label: `Transporte Marítimo Vehículo${count === 1 ? "" : "s"} (${m3r} m³ × ${fmtRate(rate)}/m³)`,
+      label:
+        `Transporte Marítimo Vehículo${count === 1 ? "" : "s"} (${m3r} m³ × ${fmtRate(rate)}/m³)` +
+        (vehiculoDesc ? ` — ${vehiculoDesc}` : ""),
       value: Math.round(m3r * rate),
     });
     const gruaLabel =

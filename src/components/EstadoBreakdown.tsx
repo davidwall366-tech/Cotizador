@@ -3,7 +3,12 @@
 import { useState } from "react";
 import { ESTADO_COLORS } from "@/lib/quote-view";
 
-const ORDEN: Array<keyof typeof ESTADO_COLORS> = ["aprobada", "pendiente", "rechazada"];
+const ORDEN: Array<keyof typeof ESTADO_COLORS> = [
+  "aprobada",
+  "aprobada_sin_abono",
+  "pendiente",
+  "rechazada",
+];
 
 export default function EstadoBreakdown({
   porEstado,

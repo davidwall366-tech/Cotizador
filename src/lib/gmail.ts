@@ -81,6 +81,32 @@ export async function sendApprovalEmail(input: SendEstadoChangeEmailInput): Prom
   });
 }
 
+/**
+ * Sent automatically when a quote's estado changes to "aprobada_sin_abono"
+ * (approved reservations, e.g. for state entities, that don't require an
+ * upfront deposit). Unlike sendApprovalEmail, never mentions an abono.
+ */
+export async function sendApprovalNoDepositEmail(input: SendEstadoChangeEmailInput): Promise<void> {
+  if (!isGmailConfigured()) {
+    throw new Error("Gmail no está configurado (faltan GMAIL_USER / GMAIL_APP_PASSWORD).");
+  }
+
+  const transport = getTransport();
+  await transport.sendMail({
+    from: `"Naviera GV" <${process.env.GMAIL_USER}>`,
+    to: input.to,
+    cc: input.cc?.length ? input.cc : undefined,
+    subject: `Cotización N° ${input.numero} — Reserva confirmada`,
+    text:
+      `Estimado/a ${input.cliente},\n\n` +
+      `Le confirmamos que su reserva correspondiente a la cotización N° ${input.numero} ha quedado ` +
+      `ingresada exitosamente en nuestro sistema.\n\n` +
+      `Quedamos atentos a cualquier consulta adicional respecto a su envío.\n\n` +
+      `Atentamente,\n${input.vendedor}\n` +
+      `Naviera GV S.A. · +56 9 7519 4982`,
+  });
+}
+
 /** Sent automatically when a quote's estado changes to "rechazada". */
 export async function sendClosedEmail(input: SendEstadoChangeEmailInput): Promise<void> {
   if (!isGmailConfigured()) {

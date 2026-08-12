@@ -61,7 +61,12 @@ export function computeEstadisticas(
   desde: Date,
   hasta = new Date()
 ): Estadisticas {
-  const porEstado: Record<Estado, number> = { pendiente: 0, aprobada: 0, rechazada: 0 };
+  const porEstado: Record<Estado, number> = {
+    pendiente: 0,
+    aprobada: 0,
+    aprobada_sin_abono: 0,
+    rechazada: 0,
+  };
   let montoTotal = 0;
   let montoAprobado = 0;
 
@@ -82,25 +87,29 @@ export function computeEstadisticas(
     cursor.setUTCMonth(cursor.getUTCMonth() + 1);
   }
 
+  // "aprobada_sin_abono" counts as an approval alongside "aprobada" — it's
+  // the same successful outcome, just without an upfront deposit.
   for (const q of quotes) {
     porEstado[q.estado] += 1;
     montoTotal += q.total;
-    if (q.estado === "aprobada") montoAprobado += q.total;
+    const esAprobada = q.estado === "aprobada" || q.estado === "aprobada_sin_abono";
+    if (esAprobada) montoAprobado += q.total;
 
     const bucket = buckets.get(monthKey(q.fecha));
     if (bucket) {
       bucket.cotizaciones += 1;
       bucket.monto += q.total;
-      if (q.estado === "aprobada") bucket.aprobadas += 1;
+      if (esAprobada) bucket.aprobadas += 1;
     }
   }
 
-  const decididas = porEstado.aprobada + porEstado.rechazada;
+  const totalAprobadas = porEstado.aprobada + porEstado.aprobada_sin_abono;
+  const decididas = totalAprobadas + porEstado.rechazada;
 
   return {
     totalCotizaciones: quotes.length,
     porEstado,
-    tasaAprobacion: decididas > 0 ? porEstado.aprobada / decididas : null,
+    tasaAprobacion: decididas > 0 ? totalAprobadas / decididas : null,
     montoTotal,
     montoAprobado,
     ticketPromedio: quotes.length > 0 ? montoTotal / quotes.length : 0,

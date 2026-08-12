@@ -18,7 +18,6 @@ export default async function NuevaCotizacionPage() {
     mostrarTelefono: false,
     correo: "",
     correosAdicionales: "",
-    enviarCorreosAdicionales: false,
     numero: String(nextNumero),
     fecha: new Date().toISOString().slice(0, 10),
     vigenciaDias: "7",

@@ -37,7 +37,8 @@ export default function FilterBar({
       >
         <option value="todas">Todos los estados</option>
         <option value="pendiente">Pendiente</option>
-        <option value="aprobada">Aprobada</option>
+        <option value="aprobada">Aprobada con Abono</option>
+        <option value="aprobada_sin_abono">Aprobada sin Abono</option>
         <option value="rechazada">Rechazada</option>
       </select>
       <select

@@ -17,6 +17,7 @@ const itemSchema = z.object({
     "contenedor10",
   ]),
   vehiculos: z.array(vehiculoSchema).optional(),
+  vehiculoDesc: z.string().optional().default(""),
   cargaM3: z.coerce.number().min(0).optional(),
   cargaDesc: z.string().optional().default(""),
   embalajeCosto: z.coerce.number().min(0).optional(),
@@ -48,7 +49,6 @@ export const quoteFormSchema = z.object({
       },
       { message: "Uno o más correos adicionales no son válidos. Sepáralos con coma." }
     ),
-  enviarCorreosAdicionales: z.boolean().optional().default(false),
   numero: z.coerce.number().int().positive(),
   fecha: z.string().min(1),
   vigenciaDias: z.coerce.number().int().positive().default(7),

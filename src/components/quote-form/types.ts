@@ -9,6 +9,7 @@ export interface VehiculoRow {
 export interface ItemState {
   tipo: TipoItem;
   vehiculos: VehiculoRow[];
+  vehiculoDesc: string;
   cargaM3: string;
   cargaDesc: string;
   embalajeCosto: string;
@@ -20,6 +21,7 @@ export function blankItemState(tipo: TipoItem = "vehiculo"): ItemState {
   return {
     tipo,
     vehiculos: [{ largo: "", ancho: "", alto: "" }],
+    vehiculoDesc: "",
     cargaM3: "",
     cargaDesc: "",
     embalajeCosto: "",
@@ -39,7 +41,6 @@ export interface QuoteFormState {
   mostrarTelefono: boolean;
   correo: string;
   correosAdicionales: string;
-  enviarCorreosAdicionales: boolean;
   numero: string;
   fecha: string;
   vigenciaDias: string;

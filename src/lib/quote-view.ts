@@ -23,6 +23,7 @@ export function itemsFromDb(quote: QuoteWithRelations): QuoteItemInput[] {
     .map((it) => ({
       tipo: it.tipo as TipoItem,
       vehiculos: it.vehiculos.map((v) => ({ largo: v.largo, ancho: v.ancho, alto: v.alto })),
+      vehiculoDesc: it.vehiculoDesc,
       cargaM3: it.cargaM3 ?? undefined,
       cargaDesc: it.cargaDesc,
       embalajeCosto: it.embalajeCosto ?? undefined,
@@ -45,7 +46,8 @@ export function tipoLabelForQuote(quote: QuoteWithRelations): string {
 
 export const ESTADO_COLORS: Record<string, { bg: string; fg: string; label: string }> = {
   pendiente: { bg: "#fef3c7", fg: "#92400e", label: "Pendiente" },
-  aprobada: { bg: "#dcfce7", fg: "#166534", label: "Aprobada" },
+  aprobada: { bg: "#dcfce7", fg: "#166534", label: "Aprobada con Abono" },
+  aprobada_sin_abono: { bg: "#dbeafe", fg: "#1e40af", label: "Aprobada sin Abono" },
   rechazada: { bg: "#fee2e2", fg: "#991b1b", label: "Rechazada" },
 };
 

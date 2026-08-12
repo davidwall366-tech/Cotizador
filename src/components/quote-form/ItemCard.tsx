@@ -169,6 +169,15 @@ export default function ItemCard({
           <div className="mt-2.5 text-[13px] text-[#475569]">
             Total: <b>{validRows.length}</b> vehículo(s) · <b>{vehiculosM3Total} m³</b>
           </div>
+          <div className="mt-2.5">
+            <label className={lblStyle}>Detalle (marca y modelo, opcional)</label>
+            <input
+              value={item.vehiculoDesc}
+              onChange={(e) => onChange({ vehiculoDesc: e.target.value })}
+              placeholder="Ej: Toyota Hilux 2020"
+              className={inputStyle}
+            />
+          </div>
         </>
       )}
 
