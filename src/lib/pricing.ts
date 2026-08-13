@@ -443,7 +443,7 @@ export function incluyeForTipos(tiposPresentes: TipoItem[], direccion: Direccion
       "."
   );
   lines.push("Maniobras de embarque y transporte marítimo.");
-  lines.push("Descarga con la carga puesta sobre camión en Rapa Nui (pago directo a SASIPA).");
+  lines.push("Descarga con la carga puesta sobre camión en Rapa Nui (Incluido pago a SASIPA).");
   return lines;
 }
 
@@ -471,7 +471,7 @@ export function condicionesForTipos(tiposPresentes: TipoItem[], vigenciaDias: nu
     lines.push("La recepción del vehículo puede demorar 1 hora.");
   }
   lines.push(
-    "Si su carga se recibe sin embalaje, se procederá a embalarla con el costo respectivo para el cliente. En caso de que se entregue ya embalada, la empresa se reserva el derecho de reembalarla si considera que la protección actual es insuficiente para el transporte marítimo, cobrando el costo adicional que esto implique."
+    "Si su carga se recibe sin embalaje, se procederá a embalarla con el costo respectivo para el cliente. En caso de que se entregue ya embalada, la empresa se reserva el derecho de reembalarla si considera que la protección actual es insuficiente para el transporte marítimo, cobrando el costo adicional que esto implique, previo aviso al cliente."
   );
   lines.push(
     "En caso de entregar su carga embalada, el cliente se hace responsable del embalaje. Esta naviera no responderá por daños a la mercancía."
