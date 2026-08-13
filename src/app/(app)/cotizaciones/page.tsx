@@ -21,10 +21,12 @@ function normalize(s: string): string {
     .toLowerCase();
 }
 
+const PAGE_SIZE = 15;
+
 export default async function CotizacionesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cliente?: string; estado?: string; direccion?: string }>;
+  searchParams: Promise<{ cliente?: string; estado?: string; direccion?: string; page?: string }>;
 }) {
   const params = await searchParams;
   const cliente = params.cliente || "";
@@ -52,6 +54,20 @@ export default async function CotizacionesPage({
     quotes = quotes.filter(
       (q) => normalize(q.cliente).includes(needle) || (asNumero !== null && q.numero === asNumero)
     );
+  }
+
+  const totalPages = Math.max(1, Math.ceil(quotes.length / PAGE_SIZE));
+  const currentPage = Math.min(Math.max(1, Number(params.page) || 1), totalPages);
+  const pagedQuotes = quotes.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  function pageHref(page: number) {
+    const qs = new URLSearchParams();
+    if (cliente) qs.set("cliente", cliente);
+    if (estado !== "todas") qs.set("estado", estado);
+    if (direccion !== "todas") qs.set("direccion", direccion);
+    if (page > 1) qs.set("page", String(page));
+    const query = qs.toString();
+    return query ? `/cotizaciones?${query}` : "/cotizaciones";
   }
 
   return (
@@ -91,7 +107,7 @@ export default async function CotizacionesPage({
               </tr>
             </thead>
             <tbody>
-              {quotes.map((q) => (
+              {pagedQuotes.map((q) => (
                 <tr key={q.id} className="border-t border-[#eef1f4]">
                   <td className="px-4 py-3.5 text-sm font-bold text-[#0e2a43]">{q.numero}</td>
                   <td className="px-4 py-3.5 text-sm">
@@ -143,6 +159,39 @@ export default async function CotizacionesPage({
         {quotes.length === 0 && (
           <div className="p-10 text-center text-[#94a3b8] text-sm">
             No hay cotizaciones que coincidan con el filtro.
+          </div>
+        )}
+        {totalPages > 1 && (
+          <div className="flex justify-between items-center gap-3 px-4 py-3.5 border-t border-[#eef1f4] flex-wrap">
+            <div className="text-xs text-[#64748b]">
+              Página {currentPage} de {totalPages} · {quotes.length} cotizaciones
+            </div>
+            <div className="flex gap-1.5">
+              {currentPage > 1 ? (
+                <Link
+                  href={pageHref(currentPage - 1)}
+                  className="bg-transparent border border-[#d7dee6] text-[#0e2a43] rounded-[7px] px-2.5 py-[7px] text-[13px] inline-block"
+                >
+                  ← Anterior
+                </Link>
+              ) : (
+                <span className="border border-[#eef1f4] text-[#c2cad3] rounded-[7px] px-2.5 py-[7px] text-[13px] inline-block cursor-not-allowed">
+                  ← Anterior
+                </span>
+              )}
+              {currentPage < totalPages ? (
+                <Link
+                  href={pageHref(currentPage + 1)}
+                  className="bg-transparent border border-[#d7dee6] text-[#0e2a43] rounded-[7px] px-2.5 py-[7px] text-[13px] inline-block"
+                >
+                  Siguiente →
+                </Link>
+              ) : (
+                <span className="border border-[#eef1f4] text-[#c2cad3] rounded-[7px] px-2.5 py-[7px] text-[13px] inline-block cursor-not-allowed">
+                  Siguiente →
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>

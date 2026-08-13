@@ -19,6 +19,9 @@ export default function FilterBar({
     const params = new URLSearchParams(searchParams.toString());
     if (value && value !== "todas") params.set(key, value);
     else params.delete(key);
+    // Changing a filter can change which page a result falls on, so always
+    // go back to page 1 rather than risk landing past the new last page.
+    params.delete("page");
     router.push(`${pathname}?${params.toString()}`);
   }
 
