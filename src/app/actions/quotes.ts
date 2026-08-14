@@ -9,6 +9,33 @@ import { computeQuoteTotals, itemValid, type QuoteItemInput } from "@/lib/pricin
 import { getTarifas } from "@/lib/tarifas";
 import { quoteFormSchema, type QuoteFormInput } from "@/lib/quote-schema";
 import { autoExportQuoteToDropbox, notifyEstadoChange } from "@/app/actions/integrations";
+import { normalize } from "@/lib/text-normalize";
+
+/**
+ * Quotes for this same client (matched case/accent-insensitively) issued
+ * since the start of the current calendar month, excluding "rechazada" —
+ * used to warn against accidentally re-quoting a client already in
+ * progress this month. Naturally stops firing once the month rolls over,
+ * since last month's quotes fall outside the range.
+ */
+export async function checkClienteEnCurso(
+  cliente: string
+): Promise<{ numero: number; estado: string }[]> {
+  const needle = normalize(cliente.trim());
+  if (!needle) return [];
+
+  const now = new Date();
+  const inicioMes = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+
+  const quotes = await prisma.quote.findMany({
+    where: { fecha: { gte: inicioMes }, estado: { not: "rechazada" } },
+    select: { numero: true, cliente: true, estado: true },
+  });
+
+  return quotes
+    .filter((q) => normalize(q.cliente) === needle)
+    .map((q) => ({ numero: q.numero, estado: q.estado }));
+}
 
 export async function getNextNumero(): Promise<number> {
   const last = await prisma.quote.findFirst({ orderBy: { numero: "desc" } });

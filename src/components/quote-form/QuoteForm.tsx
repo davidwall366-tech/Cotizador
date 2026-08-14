@@ -10,8 +10,9 @@ import {
   type QuoteItemInput,
   type Tarifas,
 } from "@/lib/pricing";
-import { createQuote, updateQuote } from "@/app/actions/quotes";
+import { checkClienteEnCurso, createQuote, updateQuote } from "@/app/actions/quotes";
 import { formatRut } from "@/lib/rut";
+import { ESTADO_COLORS } from "@/lib/quote-view";
 import ItemCard from "./ItemCard";
 import { blankItemState, type QuoteFormState } from "./types";
 import { formStateToPayload, itemStateToInput } from "./convert";
@@ -37,6 +38,12 @@ export default function QuoteForm({
   const [form, setForm] = useState<QuoteFormState>(initial);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [clienteEnCurso, setClienteEnCurso] = useState<{ numero: number; estado: string }[]>([]);
+
+  async function checkCliente() {
+    if (mode !== "new" || !form.cliente.trim()) return;
+    setClienteEnCurso(await checkClienteEnCurso(form.cliente));
+  }
 
   function patchForm(patch: Partial<QuoteFormState>) {
     setForm((f) => ({ ...f, ...patch }));
@@ -141,7 +148,11 @@ export default function QuoteForm({
             <label className={lblStyle}>Nombre / Razón social</label>
             <input
               value={form.cliente}
-              onChange={(e) => patchForm({ cliente: e.target.value })}
+              onChange={(e) => {
+                patchForm({ cliente: e.target.value });
+                if (clienteEnCurso.length) setClienteEnCurso([]);
+              }}
+              onBlur={checkCliente}
               placeholder="Ej: Juan Pérez"
               className={inputStyle}
             />
@@ -291,6 +302,20 @@ export default function QuoteForm({
             />
           </div>
         </div>
+        {clienteEnCurso.length > 0 && (
+          <div className="mt-3.5 bg-[#fff7ed] border border-[#fed7aa] rounded-lg p-3.5">
+            <div className="text-sm font-bold text-[#7c2d12] mb-1">
+              ⚠️ Este cliente ya tiene {clienteEnCurso.length === 1 ? "una cotización" : "cotizaciones"} este
+              mes
+            </div>
+            <div className="text-[13px] text-[#7c2d12]">
+              {clienteEnCurso
+                .map((q) => `N° ${q.numero} (${ESTADO_COLORS[q.estado]?.label ?? q.estado})`)
+                .join(", ")}
+              . Revisa si corresponde editar esa cotización en vez de crear una nueva.
+            </div>
+          </div>
+        )}
         <div className="mt-3.5">
           <label className={lblStyle}>Notas / observaciones</label>
           <textarea

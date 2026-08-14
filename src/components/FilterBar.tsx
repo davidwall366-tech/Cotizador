@@ -6,10 +6,12 @@ export default function FilterBar({
   cliente,
   estado,
   direccion,
+  viaje,
 }: {
   cliente: string;
   estado: string;
   direccion: string;
+  viaje: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -53,6 +55,12 @@ export default function FilterBar({
         <option value="ida">Valparaíso → Rapa Nui</option>
         <option value="vuelta">Rapa Nui → Valparaíso</option>
       </select>
+      <input
+        defaultValue={viaje}
+        onChange={(e) => setParam("viaje", e.target.value)}
+        placeholder="N° de viaje..."
+        className="px-3 py-2.5 border border-[#d7dee6] rounded-lg text-sm outline-none min-w-[140px] basis-40"
+      />
     </div>
   );
 }

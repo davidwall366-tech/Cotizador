@@ -7,37 +7,33 @@ import FilterBar from "@/components/FilterBar";
 import EstadoSelect from "@/components/EstadoSelect";
 import DeleteQuoteButton from "@/components/DeleteQuoteButton";
 import type { Prisma } from "@prisma/client";
-
-// Case- and accent-insensitive: "José", "jose", "JOSÉ" all match "jose".
-// Strips combining diacritical marks (U+0300-U+036F) left behind by NFD
-// decomposition, by code point rather than a regex range literal.
-function normalize(s: string): string {
-  return Array.from(s.normalize("NFD"))
-    .filter((ch) => {
-      const code = ch.codePointAt(0) ?? 0;
-      return code < 0x300 || code > 0x36f;
-    })
-    .join("")
-    .toLowerCase();
-}
+import { normalize } from "@/lib/text-normalize";
 
 const PAGE_SIZE = 15;
 
 export default async function CotizacionesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cliente?: string; estado?: string; direccion?: string; page?: string }>;
+  searchParams: Promise<{
+    cliente?: string;
+    estado?: string;
+    direccion?: string;
+    viaje?: string;
+    page?: string;
+  }>;
 }) {
   const params = await searchParams;
   const cliente = params.cliente || "";
   const estado = params.estado || "todas";
   const direccion = params.direccion || "todas";
+  const viaje = params.viaje || "";
 
   const [session, where] = await Promise.all([
     auth(),
     Promise.resolve<Prisma.QuoteWhereInput>({
       ...(estado !== "todas" ? { estado: estado as Prisma.QuoteWhereInput["estado"] } : {}),
       ...(direccion !== "todas" ? { direccion: direccion as Prisma.QuoteWhereInput["direccion"] } : {}),
+      ...(viaje ? { viajeN: { contains: viaje, mode: "insensitive" } } : {}),
     }),
   ]);
   const isAdmin = session?.user?.role === "ADMIN";
@@ -65,6 +61,7 @@ export default async function CotizacionesPage({
     if (cliente) qs.set("cliente", cliente);
     if (estado !== "todas") qs.set("estado", estado);
     if (direccion !== "todas") qs.set("direccion", direccion);
+    if (viaje) qs.set("viaje", viaje);
     if (page > 1) qs.set("page", String(page));
     const query = qs.toString();
     return query ? `/cotizaciones?${query}` : "/cotizaciones";
@@ -85,7 +82,7 @@ export default async function CotizacionesPage({
         </Link>
       </div>
 
-      <FilterBar cliente={cliente} estado={estado} direccion={direccion} />
+      <FilterBar cliente={cliente} estado={estado} direccion={direccion} viaje={viaje} />
 
       <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
