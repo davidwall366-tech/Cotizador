@@ -160,3 +160,40 @@ export async function sendExpirationAlertEmail(input: SendExpirationAlertInput):
       `Este es un aviso automático del Cotizador Naviera GV.`,
   });
 }
+
+export interface SendExpirationClientNoticeInput {
+  to: string;
+  cc?: string[];
+  numero: number;
+  cliente: string;
+  vigenciaDias: number;
+}
+
+/**
+ * Sent directly to the client when their quote's reservation deadline
+ * arrives today and it's still Pendiente. Deliberately separate from
+ * sendExpirationAlertEmail (staff-only): this one carries no internal
+ * instructions, just a plain heads-up in the client's own voice.
+ */
+export async function sendExpirationClientNoticeEmail(
+  input: SendExpirationClientNoticeInput
+): Promise<void> {
+  if (!isGmailConfigured()) {
+    throw new Error("Gmail no está configurado (faltan GMAIL_USER / GMAIL_APP_PASSWORD).");
+  }
+
+  const transport = getTransport();
+  await transport.sendMail({
+    from: `"Naviera GV" <${process.env.GMAIL_USER}>`,
+    to: input.to,
+    cc: input.cc?.length ? input.cc : undefined,
+    subject: `Cotización N° ${input.numero} — vence hoy el plazo de reserva`,
+    text:
+      `Estimado/a ${input.cliente},\n\n` +
+      `Le recordamos que hoy vence el plazo de ${input.vigenciaDias} días para efectuar el abono de reserva ` +
+      `de la cotización N° ${input.numero}. Si no recibimos el abono, la cotización será rechazada.\n\n` +
+      `Si ya realizó el abono, puede ignorar este mensaje.\n\n` +
+      `Quedamos atentos a cualquier consulta.\n\n` +
+      `Atentamente,\nNaviera GV S.A. · +56 9 7519 4982`,
+  });
+}

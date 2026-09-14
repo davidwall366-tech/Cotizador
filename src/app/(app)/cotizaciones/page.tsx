@@ -68,7 +68,7 @@ export default async function CotizacionesPage({
   }
 
   return (
-    <div className="flex-1 px-7 py-8 max-w-[1280px] w-full mx-auto">
+    <div className="flex-1 px-7 py-8 max-w-[1600px] w-full mx-auto">
       <div className="flex justify-between items-end flex-wrap gap-4 mb-[22px]">
         <div>
           <div className="text-2xl font-extrabold text-[#0e2a43]">Cotizaciones</div>

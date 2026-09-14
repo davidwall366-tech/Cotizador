@@ -11,7 +11,9 @@ export interface MonthBucket {
   label: string;
   cotizaciones: number;
   aprobadas: number;
+  rechazadas: number;
   monto: number;
+  montoAprobado: number;
 }
 
 export interface Estadisticas {
@@ -82,7 +84,9 @@ export function computeEstadisticas(
       label: `${MES_LABEL[cursor.getUTCMonth()]} ${cursor.getUTCFullYear()}`,
       cotizaciones: 0,
       aprobadas: 0,
+      rechazadas: 0,
       monto: 0,
+      montoAprobado: 0,
     });
     cursor.setUTCMonth(cursor.getUTCMonth() + 1);
   }
@@ -99,7 +103,11 @@ export function computeEstadisticas(
     if (bucket) {
       bucket.cotizaciones += 1;
       bucket.monto += q.total;
-      if (esAprobada) bucket.aprobadas += 1;
+      if (esAprobada) {
+        bucket.aprobadas += 1;
+        bucket.montoAprobado += q.total;
+      }
+      if (q.estado === "rechazada") bucket.rechazadas += 1;
     }
   }
 

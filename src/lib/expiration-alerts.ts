@@ -1,7 +1,8 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { fmtDate } from "@/lib/pricing";
-import { isGmailConfigured, sendExpirationAlertEmail } from "@/lib/gmail";
+import { isGmailConfigured, sendExpirationAlertEmail, sendExpirationClientNoticeEmail } from "@/lib/gmail";
+import { ccAdminsAndCreator } from "@/lib/notify-cc";
 
 function appUrl(): string {
   return process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
@@ -24,16 +25,21 @@ export interface ExpirationAlertResult {
   numero: number;
   cliente: string;
   sent: boolean;
-  to?: string;
-  cc?: string[];
+  clienteTo?: string;
+  clienteCc?: string[];
+  internoTo?: string;
+  internoCc?: string[];
   reason?: string;
 }
 
 /**
  * Finds quotes still `pendiente` whose vigenciaDias deadline has arrived and
- * emails the creator (cc: active admins + the client) so someone checks
- * whether the reservation deposit came in. Idempotent via
- * `alertaVencimientoEnviada` — safe to call more than once per day.
+ * sends two separate emails: a plain heads-up to the client (no internal
+ * instructions), and an internal one to the creator (cc: active admins)
+ * asking them to check whether the deposit came in. The client must never
+ * see the internal email's content — that was a real bug this fixes:
+ * the client used to be cc'd on the staff-facing email verbatim. Idempotent
+ * via `alertaVencimientoEnviada` — safe to call more than once per day.
  */
 export async function runExpirationAlerts(
   opts: { dryRun?: boolean } = {}
@@ -55,25 +61,25 @@ export async function runExpirationAlerts(
 
   for (const q of due) {
     const employeeEmail = q.createdBy?.email || undefined;
-    // Primary recipient must be internal staff (employee, falling back to an
-    // admin) — never the client alone, so someone on our side always sees it.
-    const to = employeeEmail || adminEmails[0];
+    // Internal notice goes to the employee who created the quote, falling
+    // back to an admin — the client is never on this email, only the plain
+    // client-facing notice below.
+    const internoTo = employeeEmail || adminEmails[0];
+    const internoCc = internoTo ? Array.from(new Set(adminEmails.filter((e) => e !== internoTo))) : undefined;
+    const clienteCc = await ccAdminsAndCreator(q);
 
-    if (!to) {
+    if (opts.dryRun) {
       results.push({
         quoteId: q.id,
         numero: q.numero,
         cliente: q.cliente,
         sent: false,
-        reason: "Sin destinatario: ni el empleado ni ningún administrador tienen correo configurado.",
+        clienteTo: q.correo,
+        clienteCc,
+        internoTo,
+        internoCc,
+        reason: "dry-run",
       });
-      continue;
-    }
-
-    const cc = Array.from(new Set([...adminEmails, q.correo].filter((e) => e && e !== to)));
-
-    if (opts.dryRun) {
-      results.push({ quoteId: q.id, numero: q.numero, cliente: q.cliente, sent: false, to, cc, reason: "dry-run" });
       continue;
     }
 
@@ -83,33 +89,64 @@ export async function runExpirationAlerts(
         numero: q.numero,
         cliente: q.cliente,
         sent: false,
-        to,
-        cc,
+        clienteTo: q.correo,
+        clienteCc,
+        internoTo,
+        internoCc,
         reason: "Gmail no está configurado.",
       });
       continue;
     }
 
     try {
-      await sendExpirationAlertEmail({
-        to,
-        cc,
+      await sendExpirationClientNoticeEmail({
+        to: q.correo,
+        cc: clienteCc,
         numero: q.numero,
         cliente: q.cliente,
         vigenciaDias: q.vigenciaDias,
-        fechaEmision: fmtDate(q.fecha),
-        quoteUrl: `${appUrl()}/cotizaciones/${q.id}`,
       });
+
+      if (internoTo) {
+        // Best-effort: the client notice above is what matters most here,
+        // so a failure notifying staff must not undo it or block marking
+        // alertaVencimientoEnviada.
+        try {
+          await sendExpirationAlertEmail({
+            to: internoTo,
+            cc: internoCc,
+            numero: q.numero,
+            cliente: q.cliente,
+            vigenciaDias: q.vigenciaDias,
+            fechaEmision: fmtDate(q.fecha),
+            quoteUrl: `${appUrl()}/cotizaciones/${q.id}`,
+          });
+        } catch (err) {
+          console.error("[expiration-alerts] internal notice failed for quote", q.id, err);
+        }
+      }
+
       await prisma.quote.update({ where: { id: q.id }, data: { alertaVencimientoEnviada: true } });
-      results.push({ quoteId: q.id, numero: q.numero, cliente: q.cliente, sent: true, to, cc });
+      results.push({
+        quoteId: q.id,
+        numero: q.numero,
+        cliente: q.cliente,
+        sent: true,
+        clienteTo: q.correo,
+        clienteCc,
+        internoTo,
+        internoCc,
+      });
     } catch (err) {
       results.push({
         quoteId: q.id,
         numero: q.numero,
         cliente: q.cliente,
         sent: false,
-        to,
-        cc,
+        clienteTo: q.correo,
+        clienteCc,
+        internoTo,
+        internoCc,
         reason: err instanceof Error ? err.message : String(err),
       });
     }

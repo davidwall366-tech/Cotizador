@@ -74,19 +74,21 @@ export default async function EstadisticasPage({
 
       <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden mt-[18px]">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse min-w-[560px]">
+          <table className="w-full border-collapse min-w-[720px]">
             <thead>
               <tr className="bg-[#f8fafc] text-left">
-                {["Mes", "Cotizaciones", "Aprobadas", "Monto cotizado"].map((h, i) => (
-                  <th
-                    key={h}
-                    className={`px-4 py-3 text-xs text-[#64748b] font-bold uppercase tracking-wide ${
-                      i > 0 ? "text-right" : ""
-                    }`}
-                  >
-                    {h}
-                  </th>
-                ))}
+                {["Mes", "Cotizaciones", "Aprobadas", "Rechazadas", "Monto cotizado", "Monto aprobado"].map(
+                  (h, i) => (
+                    <th
+                      key={h}
+                      className={`px-4 py-3 text-xs text-[#64748b] font-bold uppercase tracking-wide ${
+                        i > 0 ? "text-right" : ""
+                      }`}
+                    >
+                      {h}
+                    </th>
+                  )
+                )}
               </tr>
             </thead>
             <tbody>
@@ -96,11 +98,17 @@ export default async function EstadisticasPage({
                   <td className="px-4 py-3 text-sm text-right tabular-nums text-[#334155]">
                     {m.cotizaciones.toLocaleString("es-CL")}
                   </td>
-                  <td className="px-4 py-3 text-sm text-right tabular-nums text-[#334155]">
+                  <td className="px-4 py-3 text-sm text-right tabular-nums text-[#166534]">
                     {m.aprobadas.toLocaleString("es-CL")}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-right tabular-nums text-[#991b1b]">
+                    {m.rechazadas.toLocaleString("es-CL")}
                   </td>
                   <td className="px-4 py-3 text-sm text-right tabular-nums font-bold text-[#0e2a43]">
                     {fmtCLP(m.monto)}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-right tabular-nums font-bold text-[#166534]">
+                    {fmtCLP(m.montoAprobado)}
                   </td>
                 </tr>
               ))}
