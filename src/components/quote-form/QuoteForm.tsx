@@ -61,8 +61,8 @@ export default function QuoteForm({
     [form.items]
   );
   const { lineas, total, abono } = useMemo(
-    () => computeQuoteTotals(itemInputs, form.direccion, tarifas),
-    [itemInputs, form.direccion, tarifas]
+    () => computeQuoteTotals(itemInputs, form.direccion, tarifas, Number(form.descuentoPct) || 0),
+    [itemInputs, form.direccion, tarifas, form.descuentoPct]
   );
   const grupos = useMemo(() => agruparLineasPorItem(lineas), [lineas]);
 
@@ -241,6 +241,25 @@ export default function QuoteForm({
               <div className="text-xs text-[#94a3b8] mt-1">
                 Se asigna automáticamente. Solo un administrador puede cambiarlo.
               </div>
+            )}
+          </div>
+          <div>
+            <label className={lblStyle}>Descuento (%)</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={form.descuentoPct}
+              onChange={(e) => patchForm({ descuentoPct: e.target.value })}
+              disabled={!isAdmin}
+              readOnly={!isAdmin}
+              placeholder="0"
+              className={
+                isAdmin ? inputStyle : `${inputStyle} bg-[#f1f5f9] text-[#64748b] cursor-not-allowed`
+              }
+            />
+            {!isAdmin && (
+              <div className="text-xs text-[#94a3b8] mt-1">Solo un administrador puede aplicar descuentos.</div>
             )}
           </div>
           <div>

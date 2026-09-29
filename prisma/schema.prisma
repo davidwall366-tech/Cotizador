@@ -87,6 +87,12 @@ model Quote {
 
   estado Estado @default(pendiente)
 
+  // Optional per-quote discount (0-100), applied on top of the computed
+  // total and shown as its own "Descuento" line in the cost breakdown —
+  // for one-off cases (e.g. a client charged half price) without touching
+  // the shared Tarifas used by every other quote.
+  descuentoPct Int @default(0)
+
   // Set once the day-7 "about to expire" reminder email has gone out, so the
   // daily cron doesn't re-send it. Cleared whenever the quote is edited (the
   // expiration date may have moved) or reopened back to pendiente.

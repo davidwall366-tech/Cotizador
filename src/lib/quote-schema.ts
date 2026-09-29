@@ -50,6 +50,7 @@ export const quoteFormSchema = z.object({
       { message: "Uno o más correos adicionales no son válidos. Sepáralos con coma." }
     ),
   numero: z.coerce.number().int().positive(),
+  descuentoPct: z.coerce.number().int().min(0).max(100).optional().default(0),
   fecha: z.string().min(1),
   vigenciaDias: z.coerce.number().int().positive().default(7),
   vendedor: z.string().optional().default(""),

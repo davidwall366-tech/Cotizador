@@ -387,10 +387,22 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
   return lineas;
 }
 
-export function computeQuoteTotals(items: QuoteItemInput[], direccion: Direccion, tarifas: Tarifas) {
-  const lineas = items.flatMap((it, idx) =>
+export function computeQuoteTotals(
+  items: QuoteItemInput[],
+  direccion: Direccion,
+  tarifas: Tarifas,
+  descuentoPct: number = 0
+) {
+  const lineas: LineaCosto[] = items.flatMap((it, idx) =>
     computeLineas(it, direccion, tarifas).map((l) => ({ ...l, itemIndex: idx }))
   );
+  const subtotal = lineas.reduce((s, l) => s + l.value, 0);
+
+  const pct = Math.min(100, Math.max(0, Number(descuentoPct) || 0));
+  if (pct > 0) {
+    lineas.push({ label: `Descuento (${pct}%)`, value: -Math.round((subtotal * pct) / 100) });
+  }
+
   const total = lineas.reduce((s, l) => s + l.value, 0);
   const abono = Math.round(total / 2);
   return { lineas, total, abono };
