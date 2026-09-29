@@ -64,7 +64,7 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
 
         <div style={sectionStyle}>
           <div className="text-sm font-bold text-[#0e2a43] my-[22px] mb-2.5">
-            1. Resumen de la cotización (Viaje N° {vm.viajeN}{vm.esVuelta ? " Retorno" : ""})
+            1. Resumen de la cotización (Viaje N° {vm.viajeN})
           </div>
           <div className="text-sm text-[#334155] leading-[1.9]">
             Ruta: {vm.direccionLabel}
