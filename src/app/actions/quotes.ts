@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { requireAdminForAction } from "@/lib/admin-guard";
 import { computeQuoteTotals, itemValid, type QuoteItemInput } from "@/lib/pricing";
 import { getTarifas } from "@/lib/tarifas";
+import { ZodError } from "zod";
 import { quoteFormSchema, type QuoteFormInput } from "@/lib/quote-schema";
 import { autoExportQuoteToDropbox, notifyEstadoChange } from "@/app/actions/integrations";
 import { normalize } from "@/lib/text-normalize";
@@ -61,11 +62,29 @@ function validateBusinessRules(input: QuoteFormInput) {
   }
 }
 
+/**
+ * Server Actions only forward a plain `Error`'s message to the client in
+ * production — a raw ZodError comes through as Next's generic "Server
+ * Components render" message, with the real reason hidden. Converting it
+ * to a plain Error here is what lets QuoteForm's catch block show the
+ * actual problem (e.g. "Correo inválido") instead of that dead end.
+ */
+function parseQuoteInput(raw: QuoteFormInput): QuoteFormInput {
+  try {
+    return quoteFormSchema.parse(raw);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      throw new Error(err.issues[0]?.message || "Los datos de la cotización no son válidos.");
+    }
+    throw err;
+  }
+}
+
 export async function createQuote(raw: QuoteFormInput): Promise<{ id: string }> {
   const session = await auth();
   if (!session?.user) throw new Error("No autenticado.");
 
-  const input = quoteFormSchema.parse(raw);
+  const input = parseQuoteInput(raw);
   validateBusinessRules(input);
 
   // The "N° de cotización" field is locked to non-admins in the UI; enforce
@@ -131,7 +150,7 @@ export async function updateQuote(id: string, raw: QuoteFormInput): Promise<{ id
   const session = await auth();
   if (!session?.user) throw new Error("No autenticado.");
 
-  const input = quoteFormSchema.parse(raw);
+  const input = parseQuoteInput(raw);
   validateBusinessRules(input);
 
   // Same server-side lock as createQuote: only an admin may change the

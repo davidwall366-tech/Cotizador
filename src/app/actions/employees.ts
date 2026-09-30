@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { ZodError, type ZodType } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdminForAction } from "@/lib/admin-guard";
 import {
@@ -10,6 +11,24 @@ import {
   type EmployeeCreateInput,
   type EmployeeUpdateInput,
 } from "@/lib/employee-schema";
+
+/**
+ * Server Actions only forward a plain `Error`'s message to the client in
+ * production — a raw ZodError comes through as Next's generic "Server
+ * Components render" message, with the real reason hidden. Converting it
+ * to a plain Error here is what lets the form's catch block show the
+ * actual problem (e.g. "Correo inválido") instead of that dead end.
+ */
+function parseOrFriendlyError<T>(schema: ZodType<T>, raw: unknown): T {
+  try {
+    return schema.parse(raw);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      throw new Error(err.issues[0]?.message || "Los datos ingresados no son válidos.");
+    }
+    throw err;
+  }
+}
 
 // The login credential is still a "username" internally, but the admin no
 // longer types one — it's derived from the employee's email (now the field
@@ -33,7 +52,7 @@ async function generateUniqueUsername(email: string): Promise<string> {
 
 export async function createEmployee(raw: EmployeeCreateInput): Promise<{ id: string }> {
   await requireAdminForAction();
-  const input = employeeCreateSchema.parse(raw);
+  const input = parseOrFriendlyError(employeeCreateSchema, raw);
 
   const username = await generateUniqueUsername(input.email);
 
@@ -54,7 +73,7 @@ export async function createEmployee(raw: EmployeeCreateInput): Promise<{ id: st
 
 export async function updateEmployee(id: string, raw: EmployeeUpdateInput): Promise<void> {
   const admin = await requireAdminForAction();
-  const input = employeeUpdateSchema.parse(raw);
+  const input = parseOrFriendlyError(employeeUpdateSchema, raw);
 
   const target = await prisma.user.findUnique({ where: { id } });
   if (!target) throw new Error("Empleado no encontrado.");
