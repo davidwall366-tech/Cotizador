@@ -51,6 +51,7 @@ export const quoteFormSchema = z.object({
     ),
   numero: z.coerce.number().int().positive(),
   descuentoPct: z.coerce.number().int().min(0).max(100).optional().default(0),
+  montoCerrado: z.coerce.number().int().min(0).optional().default(0),
   fecha: z.string().min(1),
   vigenciaDias: z.coerce.number().int().positive().default(7),
   vendedor: z.string().optional().default(""),

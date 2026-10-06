@@ -20,6 +20,7 @@ export default async function NuevaCotizacionPage() {
     correosAdicionales: "",
     numero: String(nextNumero),
     descuentoPct: "0",
+    montoCerrado: "0",
     fecha: new Date().toISOString().slice(0, 10),
     vigenciaDias: "7",
     vendedor: session?.user?.name || "",

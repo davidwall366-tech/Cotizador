@@ -391,8 +391,15 @@ export function computeQuoteTotals(
   items: QuoteItemInput[],
   direccion: Direccion,
   tarifas: Tarifas,
-  descuentoPct: number = 0
+  descuentoPct: number = 0,
+  montoCerrado: number = 0
 ) {
+  const cerrado = Math.max(0, Math.round(Number(montoCerrado) || 0));
+  if (cerrado > 0) {
+    const lineas: LineaCosto[] = [{ label: "Servicio de transporte — monto cerrado", value: cerrado }];
+    return { lineas, total: cerrado, abono: Math.round(cerrado / 2) };
+  }
+
   const lineas: LineaCosto[] = items.flatMap((it, idx) =>
     computeLineas(it, direccion, tarifas).map((l) => ({ ...l, itemIndex: idx }))
   );

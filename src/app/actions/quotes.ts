@@ -92,15 +92,23 @@ export async function createQuote(raw: QuoteFormInput): Promise<{ id: string }> 
   const numero = session.user.role === "ADMIN" ? input.numero : await getNextNumero();
   // Same lock for the discount — only an admin can grant one.
   const descuentoPct = session.user.role === "ADMIN" ? input.descuentoPct : 0;
+  const montoCerrado = session.user.role === "ADMIN" ? input.montoCerrado : 0;
 
   const itemInputs = toItemInputs(input.items);
   const tarifas = await getTarifas();
-  const { lineas, total, abono } = computeQuoteTotals(itemInputs, input.direccion, tarifas, descuentoPct);
+  const { lineas, total, abono } = computeQuoteTotals(
+    itemInputs,
+    input.direccion,
+    tarifas,
+    descuentoPct,
+    montoCerrado
+  );
 
   const quote = await prisma.quote.create({
     data: {
       numero,
       descuentoPct,
+      montoCerrado,
       direccion: input.direccion,
       cliente: input.cliente,
       clienteRut: input.clienteRut,
@@ -157,19 +165,27 @@ export async function updateQuote(id: string, raw: QuoteFormInput): Promise<{ id
   // number or the discount.
   let numero = input.numero;
   let descuentoPct = input.descuentoPct;
+  let montoCerrado = input.montoCerrado;
   if (session.user.role !== "ADMIN") {
     const existing = await prisma.quote.findUnique({
       where: { id },
-      select: { numero: true, descuentoPct: true },
+      select: { numero: true, descuentoPct: true, montoCerrado: true },
     });
     if (!existing) throw new Error("Cotización no encontrada.");
     numero = existing.numero;
     descuentoPct = existing.descuentoPct;
+    montoCerrado = existing.montoCerrado;
   }
 
   const itemInputs = toItemInputs(input.items);
   const tarifas = await getTarifas();
-  const { lineas, total, abono } = computeQuoteTotals(itemInputs, input.direccion, tarifas, descuentoPct);
+  const { lineas, total, abono } = computeQuoteTotals(
+    itemInputs,
+    input.direccion,
+    tarifas,
+    descuentoPct,
+    montoCerrado
+  );
 
   await prisma.$transaction([
     prisma.quoteItem.deleteMany({ where: { quoteId: id } }),
@@ -178,6 +194,7 @@ export async function updateQuote(id: string, raw: QuoteFormInput): Promise<{ id
       data: {
         numero,
         descuentoPct,
+        montoCerrado,
         direccion: input.direccion,
         cliente: input.cliente,
         clienteRut: input.clienteRut,

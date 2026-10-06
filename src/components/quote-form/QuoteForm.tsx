@@ -61,8 +61,15 @@ export default function QuoteForm({
     [form.items]
   );
   const { lineas, total, abono } = useMemo(
-    () => computeQuoteTotals(itemInputs, form.direccion, tarifas, Number(form.descuentoPct) || 0),
-    [itemInputs, form.direccion, tarifas, form.descuentoPct]
+    () =>
+      computeQuoteTotals(
+        itemInputs,
+        form.direccion,
+        tarifas,
+        Number(form.descuentoPct) || 0,
+        Number(form.montoCerrado) || 0
+      ),
+    [itemInputs, form.direccion, tarifas, form.descuentoPct, form.montoCerrado]
   );
   const grupos = useMemo(() => agruparLineasPorItem(lineas), [lineas]);
 
@@ -261,6 +268,27 @@ export default function QuoteForm({
             {!isAdmin && (
               <div className="text-xs text-[#94a3b8] mt-1">Solo un administrador puede aplicar descuentos.</div>
             )}
+          </div>
+          <div>
+            <label className={lblStyle}>Monto cerrado ($)</label>
+            <input
+              type="number"
+              min={0}
+              step={1000}
+              value={form.montoCerrado}
+              onChange={(e) => patchForm({ montoCerrado: e.target.value })}
+              disabled={!isAdmin}
+              readOnly={!isAdmin}
+              placeholder="0"
+              className={
+                isAdmin ? inputStyle : `${inputStyle} bg-[#f1f5f9] text-[#64748b] cursor-not-allowed`
+              }
+            />
+            <div className="text-xs text-[#94a3b8] mt-1">
+              {isAdmin
+                ? "Si lo completas, reemplaza el cálculo: el documento muestra una sola línea con este valor."
+                : "Solo un administrador puede fijar un monto cerrado."}
+            </div>
           </div>
           <div>
             <label className={lblStyle}>Fecha de emisión</label>

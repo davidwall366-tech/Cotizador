@@ -43,6 +43,7 @@ export interface QuoteFormState {
   correosAdicionales: string;
   numero: string;
   descuentoPct: string;
+  montoCerrado: string;
   fecha: string;
   vigenciaDias: string;
   vendedor: string;
