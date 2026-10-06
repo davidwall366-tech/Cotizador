@@ -396,7 +396,20 @@ export function computeQuoteTotals(
 ) {
   const cerrado = Math.max(0, Math.round(Number(montoCerrado) || 0));
   if (cerrado > 0) {
-    const lineas: LineaCosto[] = [{ label: "Servicio de transporte — monto cerrado", value: cerrado }];
+    // The breakdown is hidden for a closed amount, so the cargo description
+    // has to travel on the single line or the client would never see it.
+    const detalle = items
+      .map((it) => {
+        const desc = (
+          it.tipo === "vehiculo" ? it.vehiculoDesc : it.tipo === "carga_general" ? it.cargaDesc : it.cajonDesc
+        )?.trim();
+        const qty = it.tipo !== "vehiculo" && it.tipo !== "carga_general" ? ` × ${Number(it.cajonCantidad) || 1}` : "";
+        return `${TIPOS_META[it.tipo].label}${qty}${desc ? ` — ${desc}` : ""}`;
+      })
+      .join("; ");
+    const lineas: LineaCosto[] = [
+      { label: `Servicio de transporte — monto cerrado${detalle ? ` (${detalle})` : ""}`, value: cerrado },
+    ];
     return { lineas, total: cerrado, abono: Math.round(cerrado / 2) };
   }
 
