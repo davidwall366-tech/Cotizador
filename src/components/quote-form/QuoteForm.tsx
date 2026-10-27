@@ -56,9 +56,22 @@ export default function QuoteForm({
     }));
   }
 
+  // An untouched item (e.g. the empty vehicle card the form starts with,
+  // left behind after adding a sale) is ignored instead of blocking the save
+  // or turning a sale-only quote into a mixed one.
+  const itemsEfectivos = useMemo(() => {
+    const usados = form.items.filter((it) => {
+      const blank = blankItemState(it.tipo);
+      return (Object.keys(blank) as (keyof typeof blank)[]).some(
+        (k) => JSON.stringify(it[k]) !== JSON.stringify(blank[k])
+      );
+    });
+    return usados.length > 0 ? usados : form.items;
+  }, [form.items]);
+
   const itemInputs: QuoteItemInput[] = useMemo(
-    () => form.items.map(itemStateToInput),
-    [form.items]
+    () => itemsEfectivos.map(itemStateToInput),
+    [itemsEfectivos]
   );
   const { lineas, total, abono } = useMemo(
     () =>
@@ -74,20 +87,33 @@ export default function QuoteForm({
   const grupos = useMemo(() => agruparLineasPorItem(lineas), [lineas]);
 
   // Only container sales: no voyage, so no route/viaje N°/zarpe/delivery date.
-  const soloVenta = form.items.length > 0 && form.items.every((it) => it.tipo === "venta_contenedor");
+  const soloVenta = itemsEfectivos.length > 0 && itemsEfectivos.every((it) => it.tipo === "venta_contenedor");
 
   const cannotSave =
     !form.cliente ||
     !form.correo ||
     (!soloVenta && !form.viajeN.trim()) ||
-    form.items.length === 0 ||
-    !form.items.every((it) => itemValid(itemStateToInput(it)));
+    itemsEfectivos.length === 0 ||
+    !itemsEfectivos.every((it) => itemValid(itemStateToInput(it)));
+
+  const faltantes: string[] = [];
+  if (!form.cliente) faltantes.push("el nombre del cliente");
+  if (!form.correo) faltantes.push("el correo");
+  if (!soloVenta && !form.viajeN.trim()) faltantes.push("el N° de viaje");
+  itemsEfectivos.forEach((it, i) => {
+    if (itemValid(itemStateToInput(it))) return;
+    faltantes.push(
+      it.tipo === "venta_contenedor"
+        ? `el monto cerrado del ítem ${i + 1}`
+        : `completar los datos del ítem ${i + 1}`
+    );
+  });
 
   const plazoLabel = form.direccion === "vuelta" ? "Fecha de entrega en el puerto" : "Rango de entrega en bodega";
 
   async function onSave() {
     setError(null);
-    const payload = formStateToPayload(form);
+    const payload = formStateToPayload({ ...form, items: itemsEfectivos });
     if (soloVenta) Object.assign(payload, { viajeN: "", zarpe: "", plazoRecepcion: "" });
     startTransition(async () => {
       try {
@@ -414,6 +440,9 @@ export default function QuoteForm({
       </div>
 
       {error && <div className="mb-4 text-sm text-[#991b1b]">{error}</div>}
+      {cannotSave && faltantes.length > 0 && (
+        <div className="mb-4 text-sm text-[#92400e] text-right">Para guardar falta: {faltantes.join(", ")}.</div>
+      )}
 
       <div className="flex justify-end gap-3">
         <button
