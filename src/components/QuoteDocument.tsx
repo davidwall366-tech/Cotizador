@@ -107,10 +107,12 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
               <div>VALOR TOTAL</div>
               <div>{fmtCLP(vm.total)}</div>
             </div>
-            <div className="flex justify-between px-4 py-2.5 text-xs text-[#64748b]">
-              <div>{vm.soloVenta ? "Abono del 50%" : "Abono del 50% para reserva"}</div>
-              <div>{fmtCLP(vm.abono)}</div>
-            </div>
+            {!vm.soloVenta && (
+              <div className="flex justify-between px-4 py-2.5 text-xs text-[#64748b]">
+                <div>Abono del 50% para reserva</div>
+                <div>{fmtCLP(vm.abono)}</div>
+              </div>
+            )}
           </div>
         </div>
 

@@ -425,6 +425,8 @@ export function computeQuoteTotals(
   descuentoPct: number = 0,
   montoCerrado: number = 0
 ) {
+  // Sales are paid in full, so a sale-only quote carries no abono.
+  const sinAbono = esSoloVenta(items.map((it) => it.tipo));
   const cerrado = Math.max(0, Math.round(Number(montoCerrado) || 0));
   if (cerrado > 0) {
     // The breakdown is hidden for a closed amount, so the cargo description
@@ -441,7 +443,7 @@ export function computeQuoteTotals(
     const lineas: LineaCosto[] = [
       { label: `Servicio de transporte — monto cerrado${detalle ? ` (${detalle})` : ""}`, value: cerrado },
     ];
-    return { lineas, total: cerrado, abono: Math.round(cerrado / 2) };
+    return { lineas, total: cerrado, abono: sinAbono ? 0 : Math.round(cerrado / 2) };
   }
 
   const lineas: LineaCosto[] = items.flatMap((it, idx) =>
@@ -455,7 +457,7 @@ export function computeQuoteTotals(
   }
 
   const total = lineas.reduce((s, l) => s + l.value, 0);
-  const abono = Math.round(total / 2);
+  const abono = sinAbono ? 0 : Math.round(total / 2);
   return { lineas, total, abono };
 }
 

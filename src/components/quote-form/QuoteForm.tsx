@@ -405,10 +405,12 @@ export default function QuoteForm({
           <div>VALOR TOTAL</div>
           <div>{fmtCLP(total)}</div>
         </div>
-        <div className="flex justify-between text-[13px] text-[#8a6d1f]">
-          <div>Abono del 50% para reserva</div>
-          <div>{fmtCLP(abono)}</div>
-        </div>
+        {!soloVenta && (
+          <div className="flex justify-between text-[13px] text-[#8a6d1f]">
+            <div>Abono del 50% para reserva</div>
+            <div>{fmtCLP(abono)}</div>
+          </div>
+        )}
       </div>
 
       {error && <div className="mb-4 text-sm text-[#991b1b]">{error}</div>}
