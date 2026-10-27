@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import { fmtDate } from "@/lib/pricing";
+import { esSoloVenta, fmtDate, type TipoItem } from "@/lib/pricing";
 import { isGmailConfigured, sendExpirationAlertEmail, sendExpirationClientNoticeEmail } from "@/lib/gmail";
 import { ccAdminsAndCreator } from "@/lib/notify-cc";
 
@@ -46,7 +46,7 @@ export async function runExpirationAlerts(
 ): Promise<ExpirationAlertResult[]> {
   const candidates = await prisma.quote.findMany({
     where: { estado: "pendiente", alertaVencimientoEnviada: false },
-    include: { createdBy: true },
+    include: { createdBy: true, items: { select: { tipo: true } } },
   });
 
   const due = candidates.filter((q) => isExpiringToday(q.fecha, q.vigenciaDias));
@@ -67,6 +67,7 @@ export async function runExpirationAlerts(
     const internoTo = employeeEmail || adminEmails[0];
     const internoCc = internoTo ? Array.from(new Set(adminEmails.filter((e) => e !== internoTo))) : undefined;
     const clienteCc = await ccAdminsAndCreator(q);
+    const esVenta = esSoloVenta(q.items.map((it) => it.tipo as TipoItem));
 
     if (opts.dryRun) {
       results.push({
@@ -105,6 +106,7 @@ export async function runExpirationAlerts(
         numero: q.numero,
         cliente: q.cliente,
         vigenciaDias: q.vigenciaDias,
+        esVenta,
       });
 
       if (internoTo) {
@@ -120,6 +122,7 @@ export async function runExpirationAlerts(
             vigenciaDias: q.vigenciaDias,
             fechaEmision: fmtDate(q.fecha),
             quoteUrl: `${appUrl()}/cotizaciones/${q.id}`,
+            esVenta,
           });
         } catch (err) {
           console.error("[expiration-alerts] internal notice failed for quote", q.id, err);

@@ -136,6 +136,8 @@ export interface SendExpirationAlertInput {
   vigenciaDias: number;
   fechaEmision: string;
   quoteUrl: string;
+  /** Sale-only quote: no abono, so the wording must not mention one. */
+  esVenta?: boolean;
 }
 
 export async function sendExpirationAlertEmail(input: SendExpirationAlertInput): Promise<void> {
@@ -148,16 +150,25 @@ export async function sendExpirationAlertEmail(input: SendExpirationAlertInput):
     from: `"Naviera GV" <${process.env.GMAIL_USER}>`,
     to: input.to,
     cc: input.cc?.length ? input.cc : undefined,
-    subject: `Cotización N° ${input.numero} — vencimiento del plazo de reserva`,
-    text:
-      `Estimados,\n\n` +
-      `La cotización N° ${input.numero} para ${input.cliente}, emitida el ${input.fechaEmision}, ` +
-      `cumple hoy los ${input.vigenciaDias} días de vigencia para el abono de reserva y ` +
-      `aún figura como Pendiente en el sistema.\n\n` +
-      `Si el cliente ya realizó el abono, por favor actualicen el estado de la cotización a ` +
-      `"Aprobada" en el Cotizador. Si no se recibe el abono, la cotización se considerará caducada.\n\n` +
-      `Pueden revisar el detalle aquí: ${input.quoteUrl}\n\n` +
-      `Este es un aviso automático del Cotizador Naviera GV.`,
+    subject: input.esVenta
+      ? `Cotización N° ${input.numero} — vencimiento de la vigencia (venta)`
+      : `Cotización N° ${input.numero} — vencimiento del plazo de reserva`,
+    text: input.esVenta
+      ? `Estimados,\n\n` +
+        `La cotización N° ${input.numero} para ${input.cliente}, emitida el ${input.fechaEmision}, ` +
+        `cumple hoy los ${input.vigenciaDias} días de vigencia y aún figura como Pendiente en el sistema.\n\n` +
+        `Si el cliente ya concretó la compra, por favor actualicen el estado de la cotización a ` +
+        `"Aprobada sin Abono" en el Cotizador. Si no, la cotización se considerará caducada.\n\n` +
+        `Pueden revisar el detalle aquí: ${input.quoteUrl}\n\n` +
+        `Este es un aviso automático del Cotizador Naviera GV.`
+      : `Estimados,\n\n` +
+        `La cotización N° ${input.numero} para ${input.cliente}, emitida el ${input.fechaEmision}, ` +
+        `cumple hoy los ${input.vigenciaDias} días de vigencia para el abono de reserva y ` +
+        `aún figura como Pendiente en el sistema.\n\n` +
+        `Si el cliente ya realizó el abono, por favor actualicen el estado de la cotización a ` +
+        `"Aprobada" en el Cotizador. Si no se recibe el abono, la cotización se considerará caducada.\n\n` +
+        `Pueden revisar el detalle aquí: ${input.quoteUrl}\n\n` +
+        `Este es un aviso automático del Cotizador Naviera GV.`,
   });
 }
 
@@ -167,6 +178,8 @@ export interface SendExpirationClientNoticeInput {
   numero: number;
   cliente: string;
   vigenciaDias: number;
+  /** Sale-only quote: no abono, so the wording must not mention one. */
+  esVenta?: boolean;
 }
 
 /**
@@ -187,13 +200,22 @@ export async function sendExpirationClientNoticeEmail(
     from: `"Naviera GV" <${process.env.GMAIL_USER}>`,
     to: input.to,
     cc: input.cc?.length ? input.cc : undefined,
-    subject: `Cotización N° ${input.numero} — vence hoy el plazo de reserva`,
-    text:
-      `Estimado/a ${input.cliente},\n\n` +
-      `Le recordamos que hoy vence el plazo de ${input.vigenciaDias} días para efectuar el abono de reserva ` +
-      `de la cotización N° ${input.numero}. Si no recibimos el abono, la cotización será rechazada.\n\n` +
-      `Si ya realizó el abono, puede ignorar este mensaje.\n\n` +
-      `Quedamos atentos a cualquier consulta.\n\n` +
-      `Atentamente,\nNaviera GV S.A. · +56 9 7519 4982`,
+    subject: input.esVenta
+      ? `Cotización N° ${input.numero} — vence hoy la vigencia de su cotización`
+      : `Cotización N° ${input.numero} — vence hoy el plazo de reserva`,
+    text: input.esVenta
+      ? `Estimado/a ${input.cliente},\n\n` +
+        `Le recordamos que hoy vence la vigencia de ${input.vigenciaDias} días de la cotización N° ${input.numero} ` +
+        `por la venta de contenedor. Si desea concretar la compra, le agradeceremos confirmarlo a la brevedad; ` +
+        `pasado este plazo la cotización quedará sin efecto.\n\n` +
+        `Si ya lo hizo, puede ignorar este mensaje.\n\n` +
+        `Quedamos atentos a cualquier consulta.\n\n` +
+        `Atentamente,\nNaviera GV S.A. · +56 9 7519 4982`
+      : `Estimado/a ${input.cliente},\n\n` +
+        `Le recordamos que hoy vence el plazo de ${input.vigenciaDias} días para efectuar el abono de reserva ` +
+        `de la cotización N° ${input.numero}. Si no recibimos el abono, la cotización será rechazada.\n\n` +
+        `Si ya realizó el abono, puede ignorar este mensaje.\n\n` +
+        `Quedamos atentos a cualquier consulta.\n\n` +
+        `Atentamente,\nNaviera GV S.A. · +56 9 7519 4982`,
   });
 }
