@@ -15,6 +15,8 @@ export interface ItemState {
   embalajeCosto: string;
   cajonCantidad: string;
   cajonDesc: string;
+  ventaPrecio: string;
+  ventaDescuentoPct: string;
 }
 
 export function blankItemState(tipo: TipoItem = "vehiculo"): ItemState {
@@ -27,6 +29,8 @@ export function blankItemState(tipo: TipoItem = "vehiculo"): ItemState {
     embalajeCosto: "",
     cajonCantidad: "1",
     cajonDesc: "",
+    ventaPrecio: "",
+    ventaDescuentoPct: "",
   };
 }
 

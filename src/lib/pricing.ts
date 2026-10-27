@@ -14,7 +14,8 @@ export type TipoItem =
   | "cajon173"
   | "cajon231"
   | "cajon277"
-  | "contenedor10";
+  | "contenedor10"
+  | "venta_contenedor";
 
 export type Direccion = "ida" | "vuelta";
 
@@ -33,6 +34,10 @@ export interface QuoteItemInput {
   embalajeCosto?: number;
   cajonCantidad?: number;
   cajonDesc: string;
+  /** venta_contenedor only: closed amount for the whole item, in CLP. */
+  ventaPrecio?: number;
+  /** venta_contenedor only: optional discount % on that amount. */
+  ventaDescuentoPct?: number;
 }
 
 export interface LineaCosto {
@@ -108,6 +113,12 @@ export const TIPOS_META: Record<TipoItem, TipoMeta> = {
     dims: "Capacidad 21,3 m³",
     m3: 21.3,
   },
+  venta_contenedor: {
+    label: "Venta de contenedor",
+    badge: "VC",
+    color: "#475569",
+    intro: "la venta de contenedor",
+  },
 };
 
 /** Every configurable price used below — admin-editable via /tarifas. */
@@ -157,6 +168,7 @@ export const TIPO_ORDER: TipoItem[] = [
   "cajon231",
   "cajon277",
   "contenedor10",
+  "venta_contenedor",
 ];
 
 export function fmtCLP(n: number): string {
@@ -191,6 +203,8 @@ export function blankItem(tipo: TipoItem = "vehiculo"): QuoteItemInput {
     embalajeCosto: undefined,
     cajonCantidad: 1,
     cajonDesc: "",
+    ventaPrecio: undefined,
+    ventaDescuentoPct: undefined,
   };
 }
 
@@ -205,12 +219,19 @@ export function itemValid(item: QuoteItemInput): boolean {
     );
   }
   if (item.tipo === "carga_general") return Number(item.cargaM3) > 0;
+  if (item.tipo === "venta_contenedor") return Number(item.cajonCantidad) > 0 && Number(item.ventaPrecio) > 0;
   return Number(item.cajonCantidad) > 0;
 }
 
 export function tiposPresentesOf(items: QuoteItemInput[]): TipoItem[] {
   const set = new Set(items.map((it) => it.tipo));
   return TIPO_ORDER.filter((t) => set.has(t));
+}
+
+/** A quote made only of container sales has no voyage: no viaje N°, route,
+ *  zarpe, delivery date or shipping conditions. Mixed quotes keep them. */
+export function esSoloVenta(tipos: TipoItem[]): boolean {
+  return tipos.length > 0 && tipos.every((t) => t === "venta_contenedor");
 }
 
 export function tipoLabelOf(items: QuoteItemInput[]): string {
@@ -361,6 +382,16 @@ export function computeLineas(item: QuoteItemInput, direccion: Direccion, tarifa
         value: Math.round(2.77 * tarifas.seguroCargaPorM3) * qty,
       });
     }
+  } else if (tipo === "venta_contenedor") {
+    const qty = Number(item.cajonCantidad) || 0;
+    const monto = Math.round(Number(item.ventaPrecio) || 0);
+    const pct = Math.min(100, Math.max(0, Math.round(Number(item.ventaDescuentoPct) || 0)));
+    const desc = (item.cajonDesc || "").trim();
+    lineas.push({
+      label: `Venta de Contenedor × ${qty}` + (desc ? ` — ${desc}` : ""),
+      value: monto,
+    });
+    if (pct > 0) lineas.push({ label: `Descuento (${pct}%)`, value: -Math.round((monto * pct) / 100) });
   } else if (tipo === "contenedor10") {
     const qty = Number(item.cajonCantidad) || 0;
     const m3 = 21.3;

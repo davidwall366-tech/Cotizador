@@ -58,21 +58,26 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
           )}
         </div>
         <p className="text-sm leading-[1.7] text-[#334155]">
-          Junto con saludarle, adjunto la cotización formal para {vm.intro}. Los detalles, así como
-          las condiciones comerciales y operacionales, se detallan a continuación:
+          {vm.soloVenta
+            ? `Junto con saludarle, adjunto la cotización formal para ${vm.intro}. El detalle se presenta a continuación:`
+            : `Junto con saludarle, adjunto la cotización formal para ${vm.intro}. Los detalles, así como las condiciones comerciales y operacionales, se detallan a continuación:`}
         </p>
 
         <div style={sectionStyle}>
           <div className="text-sm font-bold text-[#0e2a43] my-[22px] mb-2.5">
-            1. Resumen de la cotización (Viaje N° {vm.viajeN})
+            {vm.soloVenta ? "1. Resumen de la cotización" : `1. Resumen de la cotización (Viaje N° ${vm.viajeN})`}
           </div>
           <div className="text-sm text-[#334155] leading-[1.9]">
-            Ruta: {vm.direccionLabel}
-            <br />
-            Zarpe estimado: {vm.zarpe}
-            <br />
-            Tiempo de navegación: 11 días
-            <br />
+            {!vm.soloVenta && (
+              <>
+                Ruta: {vm.direccionLabel}
+                <br />
+                Zarpe estimado: {vm.zarpe}
+                <br />
+                Tiempo de navegación: 11 días
+                <br />
+              </>
+            )}
             Vigencia de la cotización: {vm.vigenciaDias} días desde su emisión
           </div>
         </div>
@@ -103,12 +108,13 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
               <div>{fmtCLP(vm.total)}</div>
             </div>
             <div className="flex justify-between px-4 py-2.5 text-xs text-[#64748b]">
-              <div>Abono del 50% para reserva</div>
+              <div>{vm.soloVenta ? "Abono del 50%" : "Abono del 50% para reserva"}</div>
               <div>{fmtCLP(vm.abono)}</div>
             </div>
           </div>
         </div>
 
+        {!vm.soloVenta && (
         <div style={sectionStyle}>
           <div className="text-sm font-bold text-[#0e2a43] my-[22px] mb-2.5">3. El servicio incluye</div>
           <ul className="text-sm text-[#334155] leading-[1.8] pl-5 m-0 list-disc">
@@ -117,9 +123,12 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
             ))}
           </ul>
         </div>
+        )}
 
         <div style={sectionStyle}>
-          <div className="text-sm font-bold text-[#0e2a43] my-[22px] mb-2.5">4. Datos de pago para reserva</div>
+          <div className="text-sm font-bold text-[#0e2a43] my-[22px] mb-2.5">
+            {vm.soloVenta ? "3. Datos de pago" : "4. Datos de pago para reserva"}
+          </div>
           <div className="text-sm text-[#334155] leading-[1.9]">
             Razón Social: Naviera GV SA
             <br />
@@ -131,6 +140,7 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
           </div>
         </div>
 
+        {!vm.soloVenta && (
         <div style={sectionStyle}>
           <div className="text-sm font-bold text-[#0e2a43] my-[22px] mb-2.5">5. Condiciones</div>
           <ul className="text-[13px] text-[#475569] leading-[1.8] pl-5 m-0 list-disc">
@@ -156,7 +166,9 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
             ))}
           </ul>
         </div>
+        )}
 
+        {!vm.soloVenta && (
         <div style={sectionStyle}>
           <div className="text-sm font-bold text-[#0e2a43] my-[22px] mb-2.5">{vm.logisticaTitulo}</div>
           {vm.esVuelta ? (
@@ -217,7 +229,9 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
             </ul>
           )}
         </div>
+        )}
 
+        {!vm.soloVenta && (
         <div style={sectionStyle}>
           <div className="text-sm font-bold text-[#0e2a43] my-[22px] mb-2.5">
             8. Deslinde de responsabilidad (SASIPA)
@@ -227,7 +241,9 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
             descarga y manipulación ejecutadas por la empresa SASIPA en Rapa Nui.
           </p>
         </div>
+        )}
 
+        {!vm.soloVenta && (
         <div style={sectionStyle}>
           <div className="text-sm font-bold text-[#0e2a43] my-[22px] mb-2.5">
             9. Datos requeridos para formalizar el ingreso
@@ -236,6 +252,7 @@ export default function QuoteDocument({ vm }: { vm: QuoteDocumentViewModel }) {
             Nombre completo · RUT · Dirección · Teléfono · Correo electrónico
           </div>
         </div>
+        )}
 
         {vm.notas && (
           <div style={sectionStyle}>

@@ -53,6 +53,8 @@ function toItemInputs(items: QuoteFormInput["items"]): QuoteItemInput[] {
     embalajeCosto: it.embalajeCosto,
     cajonCantidad: it.cajonCantidad,
     cajonDesc: it.cajonDesc,
+    ventaPrecio: it.ventaPrecio,
+    ventaDescuentoPct: it.ventaDescuentoPct,
   }));
 }
 
@@ -141,6 +143,8 @@ export async function createQuote(raw: QuoteFormInput): Promise<{ id: string }> 
           embalajeCosto: it.embalajeCosto,
           cajonCantidad: it.cajonCantidad ?? 1,
           cajonDesc: it.cajonDesc,
+          ventaPrecio: Math.round(it.ventaPrecio ?? 0),
+          ventaDescuentoPct: it.ventaDescuentoPct ?? 0,
           vehiculos: it.vehiculos
             ? { create: it.vehiculos.map((v) => ({ largo: v.largo, ancho: v.ancho, alto: v.alto })) }
             : undefined,
@@ -228,6 +232,8 @@ export async function updateQuote(id: string, raw: QuoteFormInput): Promise<{ id
             embalajeCosto: it.embalajeCosto,
             cajonCantidad: it.cajonCantidad ?? 1,
             cajonDesc: it.cajonDesc,
+            ventaPrecio: Math.round(it.ventaPrecio ?? 0),
+          ventaDescuentoPct: it.ventaDescuentoPct ?? 0,
             vehiculos: it.vehiculos
               ? { create: it.vehiculos.map((v) => ({ largo: v.largo, ancho: v.ancho, alto: v.alto })) }
               : undefined,

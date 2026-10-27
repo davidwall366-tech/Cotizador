@@ -15,6 +15,7 @@ const itemSchema = z.object({
     "cajon231",
     "cajon277",
     "contenedor10",
+    "venta_contenedor",
   ]),
   vehiculos: z.array(vehiculoSchema).optional(),
   vehiculoDesc: z.string().optional().default(""),
@@ -23,6 +24,8 @@ const itemSchema = z.object({
   embalajeCosto: z.coerce.number().min(0).optional(),
   cajonCantidad: z.coerce.number().min(1).optional(),
   cajonDesc: z.string().optional().default(""),
+  ventaPrecio: z.coerce.number().min(0).optional(),
+  ventaDescuentoPct: z.coerce.number().int().min(0).max(100).optional(),
 });
 
 export const quoteFormSchema = z.object({
@@ -55,11 +58,17 @@ export const quoteFormSchema = z.object({
   fecha: z.string().min(1),
   vigenciaDias: z.coerce.number().int().positive().default(7),
   vendedor: z.string().optional().default(""),
-  viajeN: z.string().trim().min(1, "El N° de viaje es obligatorio"),
+  viajeN: z.string().trim().optional().default(""),
   zarpe: z.string().optional().default(""),
   plazoRecepcion: z.string().optional().default(""),
   notas: z.string().optional().default(""),
   items: z.array(itemSchema).min(1, "Agrega al menos un ítem"),
+}).superRefine((q, ctx) => {
+  // A quote made only of container sales has no voyage, so no viaje N°.
+  const soloVenta = q.items.length > 0 && q.items.every((it) => it.tipo === "venta_contenedor");
+  if (!soloVenta && !q.viajeN) {
+    ctx.addIssue({ code: "custom", path: ["viajeN"], message: "El N° de viaje es obligatorio" });
+  }
 });
 
 export type QuoteFormInput = z.infer<typeof quoteFormSchema>;

@@ -53,6 +53,7 @@ enum TipoItem {
   cajon231
   cajon277
   contenedor10
+  venta_contenedor
 }
 
 // A single formal quote. `lineas`/`total`/`abono` are a computed snapshot
@@ -136,6 +137,11 @@ model QuoteItem {
   // cajon266 / cajon173 / cajon231 / contenedor10
   cajonCantidad Int    @default(1)
   cajonDesc     String @default("")
+
+  // venta_contenedor — closed amount for the whole item, CLP, plus an optional
+  // per-item discount %. Quantity (cajonCantidad) is informational only.
+  ventaPrecio       Int @default(0)
+  ventaDescuentoPct Int @default(0)
 
   // vehiculo — brand/model, optional.
   vehiculoDesc String @default("")

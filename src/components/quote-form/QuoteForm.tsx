@@ -73,10 +73,13 @@ export default function QuoteForm({
   );
   const grupos = useMemo(() => agruparLineasPorItem(lineas), [lineas]);
 
+  // Only container sales: no voyage, so no route/viaje N°/zarpe/delivery date.
+  const soloVenta = form.items.length > 0 && form.items.every((it) => it.tipo === "venta_contenedor");
+
   const cannotSave =
     !form.cliente ||
     !form.correo ||
-    !form.viajeN.trim() ||
+    (!soloVenta && !form.viajeN.trim()) ||
     form.items.length === 0 ||
     !form.items.every((it) => itemValid(itemStateToInput(it)));
 
@@ -85,6 +88,7 @@ export default function QuoteForm({
   async function onSave() {
     setError(null);
     const payload = formStateToPayload(form);
+    if (soloVenta) Object.assign(payload, { viajeN: "", zarpe: "", plazoRecepcion: "" });
     startTransition(async () => {
       try {
         const result =
@@ -140,6 +144,7 @@ export default function QuoteForm({
       <div className="bg-white border border-[#e2e8f0] rounded-xl p-[22px] mb-5">
         <div className="text-sm font-bold text-[#0e2a43] mb-3.5">2. Datos del cliente y la cotización</div>
         <div className="grid gap-3.5" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
+          {!soloVenta && (
           <div>
             <label className={lblStyle}>Sentido del viaje</label>
             <select
@@ -151,6 +156,7 @@ export default function QuoteForm({
               <option value="vuelta">Rapa Nui → Valparaíso</option>
             </select>
           </div>
+          )}
           <div>
             <label className={lblStyle}>Nombre / Razón social</label>
             <input
@@ -321,6 +327,7 @@ export default function QuoteForm({
               Se completa solo con tu usuario y no se puede editar.
             </div>
           </div>
+          {!soloVenta && (<>
           <div>
             <label className={lblStyle}>N° de viaje *</label>
             <input
@@ -348,6 +355,7 @@ export default function QuoteForm({
               className={inputStyle}
             />
           </div>
+          </>)}
         </div>
         {clienteEnCurso.length > 0 && (
           <div className="mt-3.5 bg-[#fff7ed] border border-[#fed7aa] rounded-lg p-3.5">

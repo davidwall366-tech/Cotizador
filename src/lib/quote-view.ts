@@ -5,6 +5,7 @@ import type { Condicion, Direccion, LineaCosto, QuoteItemInput, TipoItem } from 
 import {
   DIRECCION_LABEL,
   condicionesForTipos,
+  esSoloVenta,
   fmtDate,
   incluyeForTipos,
   introForTipos,
@@ -30,6 +31,8 @@ export function itemsFromDb(quote: QuoteWithRelations): QuoteItemInput[] {
       embalajeCosto: it.embalajeCosto ?? undefined,
       cajonCantidad: it.cajonCantidad,
       cajonDesc: it.cajonDesc,
+      ventaPrecio: it.ventaPrecio,
+      ventaDescuentoPct: it.ventaDescuentoPct,
     }));
 }
 
@@ -78,6 +81,7 @@ export interface QuoteDocumentViewModel {
   condiciones: Condicion[];
   logisticaTitulo: string;
   esVuelta: boolean;
+  soloVenta: boolean;
   plazoRecepcionLabel: string;
   plazoRecepcion: string;
   notas: string;
@@ -116,6 +120,7 @@ export function buildQuoteDocumentViewModel(quote: QuoteWithRelations): QuoteDoc
     condiciones: condicionesForTipos(tiposPresentes, quote.vigenciaDias),
     logisticaTitulo: logisticaTitulo(direccion),
     esVuelta: direccion === "vuelta",
+    soloVenta: esSoloVenta(tiposPresentes),
     plazoRecepcionLabel: plazoRecepcionLabel(direccion),
     plazoRecepcion: quote.plazoRecepcion || "—",
     notas: quote.notas || "",

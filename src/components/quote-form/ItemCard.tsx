@@ -27,7 +27,8 @@ export default function ItemCard({
 }) {
   const isVehiculo = item.tipo === "vehiculo";
   const isCargaGeneral = item.tipo === "carga_general";
-  const isCajon = item.tipo !== "vehiculo" && item.tipo !== "carga_general";
+  const isVenta = item.tipo === "venta_contenedor";
+  const isCajon = item.tipo !== "vehiculo" && item.tipo !== "carga_general" && !isVenta;
 
   const validRows = item.vehiculos.filter(
     (v) => Number(v.largo) > 0 && Number(v.ancho) > 0 && Number(v.alto) > 0
@@ -212,6 +213,54 @@ export default function ItemCard({
               value={item.embalajeCosto}
               onChange={(e) => onChange({ embalajeCosto: e.target.value })}
               placeholder="Ej: 30000"
+              className={inputStyle}
+            />
+          </div>
+        </div>
+      )}
+
+      {isVenta && (
+        <div className="grid gap-3.5" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))" }}>
+          <div>
+            <label className={lblStyle}>Cantidad de contenedores</label>
+            <input
+              type="number"
+              min={1}
+              value={item.cajonCantidad}
+              onChange={(e) => onChange({ cajonCantidad: e.target.value })}
+              className={inputStyle}
+            />
+          </div>
+          <div>
+            <label className={lblStyle}>Descripción del contenedor</label>
+            <input
+              value={item.cajonDesc}
+              onChange={(e) => onChange({ cajonDesc: e.target.value })}
+              placeholder="Ej: contenedor 20 pies, usado"
+              className={inputStyle}
+            />
+          </div>
+          <div>
+            <label className={lblStyle}>Monto cerrado ($)</label>
+            <input
+              type="number"
+              min={0}
+              step={1000}
+              value={item.ventaPrecio}
+              onChange={(e) => onChange({ ventaPrecio: e.target.value })}
+              placeholder="Ej: 2500000"
+              className={inputStyle}
+            />
+          </div>
+          <div>
+            <label className={lblStyle}>Descuento (%) opcional</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={item.ventaDescuentoPct}
+              onChange={(e) => onChange({ ventaDescuentoPct: e.target.value })}
+              placeholder="0"
               className={inputStyle}
             />
           </div>

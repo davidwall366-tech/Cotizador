@@ -42,6 +42,8 @@ export function dbToFormState(quote: QuoteWithRelations): QuoteFormState {
         embalajeCosto: it.embalajeCosto != null ? String(it.embalajeCosto) : "",
         cajonCantidad: String(it.cajonCantidad ?? 1),
         cajonDesc: it.cajonDesc,
+        ventaPrecio: it.ventaPrecio ? String(it.ventaPrecio) : "",
+        ventaDescuentoPct: it.ventaDescuentoPct ? String(it.ventaDescuentoPct) : "",
       })),
   };
 }
@@ -60,6 +62,8 @@ export function itemStateToInput(it: ItemState): QuoteItemInput {
     embalajeCosto: it.embalajeCosto === "" ? undefined : Number(it.embalajeCosto),
     cajonCantidad: it.cajonCantidad === "" ? undefined : Number(it.cajonCantidad),
     cajonDesc: it.cajonDesc,
+    ventaPrecio: it.ventaPrecio === "" ? undefined : Number(it.ventaPrecio),
+    ventaDescuentoPct: it.ventaDescuentoPct === "" ? undefined : Number(it.ventaDescuentoPct),
   };
 }
 
